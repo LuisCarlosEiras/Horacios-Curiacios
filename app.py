@@ -106,16 +106,18 @@ movs_validos = []
 
 with st.container():
     for row in linhas:
-        cols = st.columns(len(letras), gap="small")
+        cols = st.columns(len(letras))
         for i, col in enumerate(cols):
             coord = letras[i] + str(row)
             peca = st.session_state.pecas.get(coord, '')
             dono = st.session_state.donos.get(coord, '')
-            cor = '🔵' if dono == 'H' else '🔴' if dono == 'C' else ''
             cor_fundo = '#f0d9b5' if (row + i) % 2 == 0 else '#b58863'
-            label = f"{peca}"
-            if col.button(label, key=coord, help=coord):
-                col.markdown(f"<div style='background-color:{cor_fundo}; height:40px;'></div>", unsafe_allow_html=True)
+
+            style = f"background-color:{cor_fundo}; text-align:center; font-size:25px; padding:8px; border:1px solid #555;"
+            if st.session_state.get("selecionado") == coord:
+                style = style.replace(";", "; border: 3px solid red;", 1)
+
+            if col.button(f"{peca if peca else ' '}", key=coord):
                 if selecionado:
                     if coord in gerar_movimentos_validos(selecionado):
                         st.session_state.pecas[coord] = st.session_state.pecas[selecionado]
@@ -133,7 +135,7 @@ with st.container():
                 elif peca and dono == 'H':
                     st.session_state.selecionado = coord
 
-# Placar
+            col.markdown(f"<div style='{style}'>{peca if peca else '&nbsp;'}</div>", unsafe_allow_html=True)
 st.markdown(f"""
 ### Placar:
 - 🔵 Horácios: {st.session_state.vitorias_h}
@@ -152,4 +154,3 @@ def plotar_grafico():
     st.pyplot(fig)
 
 plotar_grafico()
-
