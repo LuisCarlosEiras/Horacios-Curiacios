@@ -5,15 +5,19 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Horácios e Curiácios", layout="centered")
 st.title("Jogo: Os Horácios e os Curiácios")
 
-if 'pecas' not in st.session_state:
-    st.session_state.pecas = {}
-    st.session_state.donos = {}
-    st.session_state.turno = 'H'
-    st.session_state.vitorias_h = 0
-    st.session_state.vitorias_c = 0
-    st.session_state.empates = 0
-    st.session_state.historico_curiacio = []
-    st.session_state.selecionado = None
+defaults = {
+    'pecas': {},
+    'donos': {},
+    'turno': 'H',
+    'vitorias_h': 0,
+    'vitorias_c': 0,
+    'empates': 0,
+    'historico_curiacio': [],
+    'selecionado': None
+}
+for k, v in defaults.items():
+    if k not in st.session_state:
+        st.session_state[k] = v
 
 letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 linhas = list(range(8, 0, -1))
@@ -106,7 +110,7 @@ for row in linhas:
         peca = st.session_state.pecas.get(coord, '')
         dono = st.session_state.donos.get(coord, '')
         cor_fundo = '#f0d9b5' if (row + i) % 2 == 0 else '#b58863'
-        selecionado = st.session_state.selecionado
+        selecionado = st.session_state.get("selecionado")
         estilo = f"background-color:{cor_fundo}; font-size:28px; height:48px; border:none; width:100%"
         if coord == selecionado:
             estilo += "; border: 3px solid red"
