@@ -6,12 +6,20 @@ st.set_page_config(page_title="Horácios e Curiácios", layout="centered")
 st.title("Jogo: Os Horácios e os Curiácios")
 
 # Inicializa variáveis de sessão
-if 'historico_curiacio' not in st.session_state:
-    st.session_state.historico_curiacio = []
-    st.session_state.vitorias_c = 0
+if 'pecas' not in st.session_state:
+    st.session_state.pecas = {}
+    st.session_state.donos = {}
+    st.session_state.turno = 'H'
     st.session_state.vitorias_h = 0
+    st.session_state.vitorias_c = 0
     st.session_state.empates = 0
+    st.session_state.historico_curiacio = []
 
+# Inicializa o tabuleiro
+letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+linhas = list(range(8, 0, -1))
+
+# Define o estado inicial
 def estado_inicial():
     pecas = {
         'C8': '🌹', 'D8': '🌹', 'E8': '🌹',
@@ -21,12 +29,15 @@ def estado_inicial():
         'C2': '🗡️', 'D2': '🗡️', 'E2': '🗡️',
         'C3': '⚔️', 'D3': '⚔️', 'E3': '⚔️'
     }
-    donos = {}
-    for pos in pecas:
-        donos[pos] = 'C' if int(pos[1]) >= 6 else 'H'
-    return pecas, donos
+    donos = {pos: ('C' if int(pos[1]) >= 6 else 'H') for pos in pecas}
+    st.session_state.pecas = pecas
+    st.session_state.donos = donos
+    st.session_state.turno = 'H'
 
-def gerar_movimentos_validos(origem, pecas, donos):
+# Gera movimentos válidos
+def gerar_movimentos_validos(origem):
+    pecas = st.session_state.pecas
+    donos = st.session_state.donos
     tipo = pecas[origem]
     movimentos = []
     col0 = ord(origem[0])
@@ -44,25 +55,33 @@ def gerar_movimentos_validos(origem, pecas, donos):
                     movimentos.append(destino)
     return movimentos
 
-def jogada_ia(dono, pecas, donos):
-    melhor = None
-    melhor_peso = -1
-    for pos in list(pecas):
-        if donos[pos] != dono:
+# Jogada IA
+
+def jogada_ia():
+    pecas = st.session_state.pecas
+    donos = st.session_state.donos
+    melhor, peso = None, -1
+    for origem in list(pecas):
+        if donos[origem] != 'C':
             continue
-        for destino in gerar_movimentos_validos(pos, pecas, donos):
-            peso = random.random() + (1 if destino in pecas else 0)
-            if peso > melhor_peso:
-                melhor = (pos, destino)
-                melhor_peso = peso
+        for destino in gerar_movimentos_validos(origem):
+            p = random.random() + (1 if destino in pecas else 0)
+            if p > peso:
+                melhor = (origem, destino)
+                peso = p
     if melhor:
         origem, destino = melhor
         pecas[destino] = pecas[origem]
-        donos[destino] = donos[origem]
+        donos[destino] = 'C'
         del pecas[origem]
         del donos[origem]
+    st.session_state.pecas = pecas
+    st.session_state.donos = donos
+    st.session_state.turno = 'H'
 
-def verificar_fim(pecas, donos):
+# Verifica fim de jogo
+def verificar_fim():
+    donos = st.session_state.donos
     vivos_h = sum(1 for d in donos.values() if d == 'H')
     vivos_c = sum(1 for d in donos.values() if d == 'C')
     if vivos_h == 0:
@@ -77,13 +96,50 @@ def verificar_fim(pecas, donos):
         return 'E'
     return None
 
-def simular_treinamento(n):
-    for _ in range(n):
-        pecas, donos = estado_inicial()
-        for _ in range(20):
-            jogada_ia('C', pecas, donos)
-        verificar_fim(pecas, donos)
+# Resetar jogo
+if st.button("🔄 Reiniciar Jogo"):
+    estado_inicial()
 
+# Jogada do Humano
+selecionado = st.session_state.get("selecionado")
+movs_validos = []
+
+with st.container():
+    for row in linhas:
+        cols = st.columns(len(letras))
+        for i, col in enumerate(cols):
+            coord = letras[i] + str(row)
+            peca = st.session_state.pecas.get(coord, '')
+            dono = st.session_state.donos.get(coord, '')
+            cor = '🔵' if dono == 'H' else '🔴' if dono == 'C' else ''
+            label = f"{peca}"
+            if col.button(label, key=coord):
+                if selecionado:
+                    if coord in gerar_movimentos_validos(selecionado):
+                        st.session_state.pecas[coord] = st.session_state.pecas[selecionado]
+                        st.session_state.donos[coord] = 'H'
+                        del st.session_state.pecas[selecionado]
+                        del st.session_state.donos[selecionado]
+                        st.session_state.selecionado = None
+                        st.session_state.turno = 'C'
+                        resultado = verificar_fim()
+                        if resultado is None:
+                            jogada_ia()
+                            verificar_fim()
+                    else:
+                        st.session_state.selecionado = None
+                elif peca and dono == 'H':
+                    st.session_state.selecionado = coord
+
+# Placar
+st.markdown(f"""
+### Placar:
+- 🔵 Horácios: {st.session_state.vitorias_h}
+- 🔴 Curiácios: {st.session_state.vitorias_c}
+- 🤝 Empates: {st.session_state.empates}
+""")
+
+# Gráfico
 def plotar_grafico():
     fig, ax = plt.subplots()
     ax.plot(range(1, len(st.session_state.historico_curiacio)+1),
@@ -93,30 +149,4 @@ def plotar_grafico():
     ax.set_ylabel("Vitórias acumuladas")
     st.pyplot(fig)
 
-# Botoes
-col1, col2, col3 = st.columns(3)
-if col1.button("📊 Treinamento 100 jogos"):
-    simular_treinamento(100)
-
-if col2.button("🔄 Reiniciar o Jogo"):
-    st.session_state.vitorias_c = 0
-    st.session_state.vitorias_h = 0
-    st.session_state.empates = 0
-    st.session_state.historico_curiacio = []
-
-if col3.button("🧹 Zerar Treinamento"):
-    st.session_state.vitorias_c = 0
-    st.session_state.historico_curiacio = []
-
-# Placar
-total = st.session_state.vitorias_c + st.session_state.vitorias_h + st.session_state.empates
-st.markdown(f"""
-### Placar:
-- 🔵 Horácios: {st.session_state.vitorias_h} 
-- 🔴 Curiácios: {st.session_state.vitorias_c} 
-- 🤝 Empates: {st.session_state.empates} 
-- Total: {total}
-""")
-
-# Gráfico
 plotar_grafico()
