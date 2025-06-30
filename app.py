@@ -19,6 +19,10 @@ for k, v in defaults.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
+# Inicializa o tabuleiro na primeira execução
+if not st.session_state.pecas:
+    estado_inicial()
+
 letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 linhas = list(range(8, 0, -1))
 
@@ -154,4 +158,3 @@ def plotar_grafico():
     st.pyplot(fig)
 
 plotar_grafico()
- 
