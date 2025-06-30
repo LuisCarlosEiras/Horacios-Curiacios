@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Horácios e Curiácios", layout="centered")
 st.title("Jogo: Os Horácios e os Curiácios")
 
-# Inicializa variáveis de sessão
 if 'pecas' not in st.session_state:
     st.session_state.pecas = {}
     st.session_state.donos = {}
@@ -14,12 +13,12 @@ if 'pecas' not in st.session_state:
     st.session_state.vitorias_c = 0
     st.session_state.empates = 0
     st.session_state.historico_curiacio = []
+    st.session_state.selecionado = None
 
-# Inicializa o tabuleiro
 letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 linhas = list(range(8, 0, -1))
 
-# Define o estado inicial
+# Estado inicial
 def estado_inicial():
     pecas = {
         'C8': '🏹', 'D8': '🏹', 'E8': '🏹',
@@ -33,8 +32,9 @@ def estado_inicial():
     st.session_state.pecas = pecas
     st.session_state.donos = donos
     st.session_state.turno = 'H'
+    st.session_state.selecionado = None
 
-# Gera movimentos válidos
+# Movimentos válidos
 def gerar_movimentos_validos(origem):
     pecas = st.session_state.pecas
     donos = st.session_state.donos
@@ -56,7 +56,6 @@ def gerar_movimentos_validos(origem):
     return movimentos
 
 # Jogada IA
-
 def jogada_ia():
     pecas = st.session_state.pecas
     donos = st.session_state.donos
@@ -75,11 +74,9 @@ def jogada_ia():
         donos[destino] = 'C'
         del pecas[origem]
         del donos[origem]
-    st.session_state.pecas = pecas
-    st.session_state.donos = donos
     st.session_state.turno = 'H'
 
-# Verifica fim de jogo
+# Verifica fim
 def verificar_fim():
     donos = st.session_state.donos
     vivos_h = sum(1 for d in donos.values() if d == 'H')
@@ -96,28 +93,26 @@ def verificar_fim():
         return 'E'
     return None
 
-# Resetar jogo
+# Reiniciar
 if st.button("🔄 Reiniciar Jogo"):
     estado_inicial()
 
-# Jogada do Humano
-selecionado = st.session_state.get("selecionado")
-movs_validos = []
+# Tabuleiro com botões e estilo
+st.markdown("<style>div[data-testid='column'] > div {text-align: center}</style>", unsafe_allow_html=True)
+for row in linhas:
+    cols = st.columns(len(letras))
+    for i, col in enumerate(cols):
+        coord = letras[i] + str(row)
+        peca = st.session_state.pecas.get(coord, '')
+        dono = st.session_state.donos.get(coord, '')
+        cor_fundo = '#f0d9b5' if (row + i) % 2 == 0 else '#b58863'
+        selecionado = st.session_state.selecionado
+        estilo = f"background-color:{cor_fundo}; font-size:28px; height:48px; border:none; width:100%"
+        if coord == selecionado:
+            estilo += "; border: 3px solid red"
 
-with st.container():
-    for row in linhas:
-        cols = st.columns(len(letras))
-        for i, col in enumerate(cols):
-            coord = letras[i] + str(row)
-            peca = st.session_state.pecas.get(coord, '')
-            dono = st.session_state.donos.get(coord, '')
-            cor_fundo = '#f0d9b5' if (row + i) % 2 == 0 else '#b58863'
-
-            style = f"background-color:{cor_fundo}; text-align:center; font-size:25px; padding:8px; border:1px solid #555;"
-            if st.session_state.get("selecionado") == coord:
-                style = style.replace(";", "; border: 3px solid red;", 1)
-
-            if col.button(f"{peca if peca else ' '}", key=coord):
+        with col:
+            if st.button(peca if peca else " ", key=coord):
                 if selecionado:
                     if coord in gerar_movimentos_validos(selecionado):
                         st.session_state.pecas[coord] = st.session_state.pecas[selecionado]
@@ -134,8 +129,9 @@ with st.container():
                         st.session_state.selecionado = None
                 elif peca and dono == 'H':
                     st.session_state.selecionado = coord
+            st.markdown(f"<div style='{estilo}'>{peca if peca else '&nbsp;'}</div>", unsafe_allow_html=True)
 
-            col.markdown(f"<div style='{style}'>{peca if peca else '&nbsp;'}</div>", unsafe_allow_html=True)
+# Placar
 st.markdown(f"""
 ### Placar:
 - 🔵 Horácios: {st.session_state.vitorias_h}
