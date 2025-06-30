@@ -1,13 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Horácios e Curiácios</title>
 <style>
   body { font-family: sans-serif; text-align: center; background: #eee; }
-  h1 { font-size: 2rem; }
   #tabuleiro {
     display: grid;
     grid-template-columns: repeat(7, 60px);
@@ -43,9 +40,9 @@
 <h1>Os Horácios e os Curiácios</h1>
 <div id="tabuleiro"></div>
 <div id="controle">
-  <button onclick="zerarTreinamento()">🧹 Zerar Treinamento</button>
   <button onclick="reiniciarJogo()">🔄 Reiniciar o Jogo</button>
   <button onclick="simularAprendizado()">📊 Treinamento 100 jogos</button>
+  <button onclick="zerarTreinamento()">🧹 Zerar Treinamento</button>
 </div>
 <div id="placar"></div>
 <canvas id="grafico" width="400" height="150"></canvas>
@@ -176,26 +173,28 @@ function reiniciarJogo() {
   estadoInicial();
 }
 
-
-function zerarTreinamento() {
-  vitoriasH = 0; vitoriasC = 0; empates = 0; historicoCuriacio = [];
-  atualizarPlacar();
-  desenharGrafico();
-}
-
-function simularAprendizado()
- {
-  for (let i = 0; i < 10; i++) {
+function simularAprendizado() {
+  for (let i = 0; i < 100; i++) {
     estadoInicial();
     for (let turno = 0; turno < 20; turno++) jogadaCuriacio();
     verificarFimDeJogo();
   }
-  reiniciarJogo();
+  atualizarTabuleiro();
+  desenharGrafico();
+}
+
+function zerarTreinamento() {
+  vitoriasH = 0;
+  vitoriasC = 0;
+  empates = 0;
+  historicoCuriacio = [];
+  atualizarPlacar();
   desenharGrafico();
 }
 
 function atualizarPlacar() {
-  document.getElementById("placar").innerHTML = `🔵 Horácios: ${vitoriasH} | 🔴 Curiácios: ${vitoriasC} | 🤝 Empates: ${empates}`;
+  document.getElementById("placar").innerHTML =
+    `🔵 Horácios: ${vitoriasH} | 🔴 Curiácios: ${vitoriasC} | 🤝 Empates: ${empates}`;
 }
 
 function verificarFimDeJogo() {
