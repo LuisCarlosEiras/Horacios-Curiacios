@@ -22,10 +22,10 @@ linhas = list(range(8, 0, -1))
 # Define o estado inicial
 def estado_inicial():
     pecas = {
-        'C8': '🌹', 'D8': '🌹', 'E8': '🌹',
+        'C8': '🏹', 'D8': '🏹', 'E8': '🏹',
         'C7': '🗡️', 'D7': '🗡️', 'E7': '🗡️',
         'C6': '⚔️', 'D6': '⚔️', 'E6': '⚔️',
-        'C1': '🌹', 'D1': '🌹', 'E1': '🌹',
+        'C1': '🏹', 'D1': '🏹', 'E1': '🏹',
         'C2': '🗡️', 'D2': '🗡️', 'E2': '🗡️',
         'C3': '⚔️', 'D3': '⚔️', 'E3': '⚔️'
     }
@@ -42,7 +42,7 @@ def gerar_movimentos_validos(origem):
     movimentos = []
     col0 = ord(origem[0])
     row0 = int(origem[1])
-    alcance = 3 if tipo == '🌹' else 2 if tipo == '🗡️' else 1
+    alcance = 3 if tipo == '🏹' else 2 if tipo == '🗡️' else 1
     for dx in range(-alcance, alcance + 1):
         for dy in range(-alcance, alcance + 1):
             if dx == 0 and dy == 0:
@@ -106,14 +106,16 @@ movs_validos = []
 
 with st.container():
     for row in linhas:
-        cols = st.columns(len(letras))
+        cols = st.columns(len(letras), gap="small")
         for i, col in enumerate(cols):
             coord = letras[i] + str(row)
             peca = st.session_state.pecas.get(coord, '')
             dono = st.session_state.donos.get(coord, '')
             cor = '🔵' if dono == 'H' else '🔴' if dono == 'C' else ''
+            cor_fundo = '#f0d9b5' if (row + i) % 2 == 0 else '#b58863'
             label = f"{peca}"
-            if col.button(label, key=coord):
+            if col.button(label, key=coord, help=coord):
+                col.markdown(f"<div style='background-color:{cor_fundo}; height:40px;'></div>", unsafe_allow_html=True)
                 if selecionado:
                     if coord in gerar_movimentos_validos(selecionado):
                         st.session_state.pecas[coord] = st.session_state.pecas[selecionado]
