@@ -154,3 +154,4 @@ def plotar_grafico():
     st.pyplot(fig)
 
 plotar_grafico()
+ 
