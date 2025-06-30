@@ -7,4 +7,4 @@ st.title("Jogo: Os Horácios e os Curiácios")
 with open("tabuleiro.html", "r", encoding="utf-8") as f:
     html = f.read()
 
-components.html(html, height=800, scrolling=False)
+components.html(html, height=1000, scrolling=False)
