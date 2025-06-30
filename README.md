@@ -1,3 +1,5 @@
+https://luiscarloseiras-horacios-curiacios-app-gmevtg.streamlit.app/
+
 # Os Horácios e os Curiácios
 
 Jogo de estratégia baseado na lenda romana dos Horácios e Curiácios. Esta versão usa Streamlit para exibir uma interface web interativa com simulações IA vs IA.
