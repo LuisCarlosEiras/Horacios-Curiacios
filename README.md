@@ -1,22 +1,17 @@
-https://luiscarloseiras-horacios-curiacios-app-gmevtg.streamlit.app/
+# Os Horácios e os Curiácios 🛡️⚔️
 
-# Os Horácios e os Curiácios
-
-Jogo de estratégia baseado na lenda romana dos Horácios e Curiácios. Esta versão usa Streamlit para exibir uma interface web interativa com simulações IA vs IA.
-
-## Instruções
-
-1. Instale os pacotes com `pip install -r requirements.txt`
-2. Execute o app com `streamlit run app.py`
-3. Interaja com o jogo no navegador.
+Protótipo de jogo baseado na obra de Bertolt Brecht com IA de aprendizado por reforço para simular batalhas entre Horácios e Curiácios.
 
 ## Funcionalidades
 
-- Jogador humano vs IA Curiácio
-- Botão de simulação de 100 jogos IA vs IA ("Treinamento 100 jogos")
-- Gráfico de vitórias dos Curiácios
-- Botão de reinício e de zerar treinamento
+- Tabuleiro 7x8 com guerreiros animados
+- IA dos Curiácios com simulações automáticas de aprendizado
+- Histórico de partidas
+- Gráfico de desempenho
 
-## Licença
+## Como Executar
 
-MIT License
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
