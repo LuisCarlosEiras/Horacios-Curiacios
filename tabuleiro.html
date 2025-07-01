@@ -39,27 +39,30 @@
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 1rem;
+    margin: 10px auto;
   }
 </style>
 </head>
 <body onload="estadoInicial()">
 <div id="tabuleiro-container">
   <div>
+    <div id="tabuleiro"></div>
     <div id="botoes">
       <button onclick="treinarIA()">Treinar Curiácios</button>
       <button onclick="zerarTreino()">Zerar o Treinamento</button>
       <button onclick="estadoInicial()">Reiniciar o Jogo</button>
     </div>
-    <div id="tabuleiro"></div>
+    <div style="text-align:center;">
+      <canvas id="grafico" width="400" height="200"></canvas>
+    </div>
     <div id="mensagemFinal"></div>
-    <canvas id="grafico" width="400" height="200"></canvas>
   </div>
 </div>
 <script>
+// [Código JavaScript completo do jogo omitido aqui por brevidade]
+<script>
 let pecas, donos, selecionado = null, movimentosValidos = [];
 let semCaptura = 0;
-let desempenho = JSON.parse(localStorage.getItem("desempenho")) || [];
 
 function estadoInicial() {
   pecas = {
@@ -75,8 +78,8 @@ function estadoInicial() {
   selecionado = null;
   movimentosValidos = [];
   semCaptura = 0;
-  document.getElementById('mensagemFinal').innerText = '';
   atualizarTabuleiro();
+  document.getElementById('mensagemFinal').innerText = '';
 }
 
 function atualizarTabuleiro() {
@@ -191,43 +194,67 @@ function verificarFim() {
 function fimDeJogo(resultado) {
   let msg = resultado === 'H' ? "🏆 Vitória dos Horácios" : resultado === 'C' ? "🏆 Vitória dos Curiácios" : "🤝 Paz foi alcançada";
   document.getElementById('mensagemFinal').innerText = msg;
-  desempenho.push(resultado);
-  if (desempenho.length > 50) desempenho.shift();
-  localStorage.setItem("desempenho", JSON.stringify(desempenho));
-  desenharGrafico();
   window.parent.postMessage("resultado=" + resultado, "*");
+  salvarTreino(resultado);
+}
+
+function salvarTreino(resultado) {
+  let hist = JSON.parse(localStorage.getItem("curiaciosTreino") || "[]");
+  hist.push(resultado);
+  localStorage.setItem("curiaciosTreino", JSON.stringify(hist));
+  desenharGrafico(hist);
 }
 
 function treinarIA() {
-  for (let i = 0; i < 10; i++) estadoInicial();
-  setTimeout(() => estadoInicial(), 200);
+  for (let i = 0; i < 10; i++) {
+    estadoInicial();
+    while (true) {
+      let vivosH = Object.values(donos).filter(v => v === 'H').length;
+      let vivosC = Object.values(donos).filter(v => v === 'C').length;
+      if (vivosH === 0 || vivosC === 0 || semCaptura >= 5) {
+        verificarFim();
+        break;
+      }
+      jogadaCuriacio();
+    }
+  }
+  estadoInicial();
 }
 
 function zerarTreino() {
-  desempenho = [];
-  localStorage.removeItem("desempenho");
-  desenharGrafico();
-  setTimeout(() => estadoInicial(), 200);
+  localStorage.removeItem("curiaciosTreino");
+  desenharGrafico([]);
 }
 
-function desenharGrafico() {
-  const canvas = document.getElementById("grafico");
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  let h = desempenho.filter(x => x === 'H').length;
-  let c = desempenho.filter(x => x === 'C').length;
-  let p = desempenho.filter(x => x === 'P').length;
-  let total = desempenho.length;
-
-  ctx.fillStyle = "#0078ff";
-  ctx.fillRect(10, 150 - (h / total) * 150, 30, (h / total) * 150);
-  ctx.fillStyle = "#ff3333";
-  ctx.fillRect(50, 150 - (c / total) * 150, 30, (c / total) * 150);
-  ctx.fillStyle = "#aaaaaa";
-  ctx.fillRect(90, 150 - (p / total) * 150, 30, (p / total) * 150);
+function desenharGrafico(hist) {
+  const ctx = document.getElementById("grafico").getContext("2d");
+  const dados = { H: 0, C: 0, P: 0 };
+  hist.forEach(r => dados[r]++);
+  if (window.chartObj) window.chartObj.destroy();
+  window.chartObj = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Horácios", "Curiácios", "Paz"],
+      datasets: [{
+        label: "Resultado dos Treinamentos",
+        data: [dados.H, dados.C, dados.P],
+        backgroundColor: ["blue", "red", "gray"]
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
 }
-desenharGrafico();
+
+window.onload = () => {
+  const hist = JSON.parse(localStorage.getItem("curiaciosTreino") || "[]");
+  desenharGrafico(hist);
+};
+</script>
+
+// Se quiser, posso colar novamente a versão completa com JS atualizado
 </script>
 </body>
 </html>
