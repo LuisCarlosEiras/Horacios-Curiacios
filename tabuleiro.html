@@ -4,13 +4,24 @@
 <meta charset="UTF-8">
 <title>Horácios e Curiácios</title>
 <style>
-  body { font-family: sans-serif; text-align: center; background: #eee; }
+  body {
+    font-family: sans-serif;
+    background: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   #tabuleiro {
     display: grid;
     grid-template-columns: repeat(7, 60px);
     grid-template-rows: repeat(8, 60px);
-    margin: 1rem auto;
     border: 4px solid #333;
+    margin-bottom: 1rem;
   }
   .casa {
     width: 60px; height: 60px;
@@ -30,18 +41,28 @@
   }
   .horacio { background-color: rgba(0,120,255,0.3); border-radius: 50%; padding: 5px; }
   .curiacio { background-color: rgba(255,50,50,0.4); border-radius: 50%; padding: 5px; }
+  #grafico {
+    width: 400px;
+    margin-top: 20px;
+  }
 </style>
 </head>
 <body onload="estadoInicial()">
 <h2>Tabuleiro</h2>
-<div id="tabuleiro"></div>
-<button onclick="treinarIA()">Treinar Curiácios</button>
-<button onclick="zerarTreino()">Zerar Treinamento</button>
-<button onclick="estadoInicial()">Reiniciar o Jogo</button>
-<div id="mensagemFinal"></div>
+<div id="container">
+  <div id="tabuleiro"></div>
+  <button onclick="treinarIA()">Treinar Curiácios</button>
+  <button onclick="zerarTreino()">Zerar Treinamento</button>
+  <button onclick="estadoInicial()">Reiniciar o Jogo</button>
+  <div id="mensagemFinal"></div>
+  <canvas id="grafico"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let pecas, donos, selecionado = null, movimentosValidos = [];
 let semCaptura = 0;
+let historico = JSON.parse(localStorage.getItem("historico")) || [];
 
 function estadoInicial() {
   pecas = {
@@ -59,6 +80,7 @@ function estadoInicial() {
   semCaptura = 0;
   atualizarTabuleiro();
   document.getElementById('mensagemFinal').innerText = '';
+  desenharGrafico();
 }
 
 function atualizarTabuleiro() {
@@ -173,17 +195,47 @@ function verificarFim() {
 function fimDeJogo(resultado) {
   let msg = resultado === 'H' ? "🏆 Vitória dos Horácios" : resultado === 'C' ? "🏆 Vitória dos Curiácios" : "🤝 Paz foi alcançada";
   document.getElementById('mensagemFinal').innerText = msg;
-  window.parent.postMessage("resultado=" + resultado, "*");
+  historico.push(resultado);
+  localStorage.setItem("historico", JSON.stringify(historico));
+  desenharGrafico();
 }
 
 function treinarIA() {
-  for (let i = 0; i < 10; i++) estadoInicial();
-  setTimeout(() => estadoInicial(), 200);
+  for (let i = 0; i < 10; i++) {
+    estadoInicial();
+    for (let j = 0; j < 10; j++) jogadaCuriacio();
+  }
+  estadoInicial();
 }
 
 function zerarTreino() {
-  localStorage.clear();
-  setTimeout(() => estadoInicial(), 200);
+  localStorage.removeItem("historico");
+  historico = [];
+  estadoInicial();
+}
+
+function desenharGrafico() {
+  const ctx = document.getElementById('grafico').getContext('2d');
+  const contagem = { H: 0, C: 0, P: 0 };
+  historico.forEach(r => contagem[r]++);
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Horácios', 'Curiácios', 'Paz'],
+      datasets: [{
+        label: 'Resultados',
+        data: [contagem.H, contagem.C, contagem.P],
+        backgroundColor: ['blue', 'red', 'gray']
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, precision: 0 }
+      }
+    }
+  });
 }
 </script>
 </body>
