@@ -14,7 +14,7 @@ Clique nas peças azuis para movê-las e assista a IA responder automaticamente.
 components.html(html_code, height=800, scrolling=False)
 
 # Exibir resultado final do jogo, se recebido via parâmetro
-resultado = st.experimental_get_query_params().get("resultado", [None])[0]
+resultado = st.query_params().get("resultado", [None])[0]
 if resultado:
     if resultado == "H":
         st.success("🏆 Vitória dos Horácios!")
