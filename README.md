@@ -1,3 +1,5 @@
+https://luiscarloseiras-horacios-curiacios-app-gmevtg.streamlit.app/
+
 # Jogo: Os Horácios e os Curiácios
 
 Este é um protótipo jogável inspirado na obra de Brecht. Os jogadores controlam os Horácios (🔵) contra a IA dos Curiácios (🔴). Jogado diretamente no navegador via mouse, com reforço de aprendizado para os Curiácios.
