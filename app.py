@@ -1,31 +1,22 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import pandas as pd
+import os
 
-st.set_page_config(page_title="Horácios e Curiácios", layout="centered")
+st.set_page_config(page_title="Horácios e Curiácios", layout="wide")
 
-if "historico" not in st.session_state:
-    st.session_state.historico = []
+st.markdown("## Jogo: Os Horácios e os Curiácios")
 
-# Detectar resultado vindo do HTML
-query_resultado = st.query_params.get("resultado", None)
-if query_resultado:
-    resultado = query_resultado[0]
-    if resultado in ["H", "C", "P"]:
-        simbolos = {"H": "🏆 Vitória dos Horácios", "C": "🏆 Vitória dos Curiácios", "P": "🤝 Paz"}
-        st.session_state.historico.append(simbolos[resultado])
-        st.query_params.clear()
+# Resultado da partida
+resultado = st.query_params.get("resultado", [None])[0]
 
-# Carregar o tabuleiro
-with open("tabuleiro.html", "r", encoding="utf-8") as f:
-    html = f.read()
+if resultado:
+    st.success(f"Resultado da última partida: {'Vitória dos Horácios' if resultado=='H' else 'Vitória dos Curiácios' if resultado=='C' else 'Paz'}")
 
-components.html(html, height=700, scrolling=False)
+# Caminho para o HTML do tabuleiro
+html_path = os.path.join(os.path.dirname(__file__), "tabuleiro.html")
 
-# Mostrar placar
-st.markdown("### Resultado das partidas:")
-if st.session_state.historico:
-    df = pd.DataFrame(st.session_state.historico, columns=["Resultado"])
-    st.dataframe(df, use_container_width=True, hide_index=True)
-else:
-    st.info("Nenhuma partida foi registrada ainda.")
+# Renderiza o HTML
+with open(html_path, 'r', encoding='utf-8') as file:
+    html_content = file.read()
+
+components.html(html_content, height=800, scrolling=True)

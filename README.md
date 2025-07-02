@@ -1,17 +1,15 @@
-# Os Horácios e os Curiácios 🛡️⚔️
+# Jogo: Os Horácios e os Curiácios
 
-Protótipo de jogo baseado na obra de Bertolt Brecht com IA de aprendizado por reforço para simular batalhas entre Horácios e Curiácios.
+Este é um protótipo jogável inspirado na obra de Brecht. Os jogadores controlam os Horácios (🔵) contra a IA dos Curiácios (🔴). Jogado diretamente no navegador via mouse, com reforço de aprendizado para os Curiácios.
 
 ## Funcionalidades
 
-- Tabuleiro 7x8 com guerreiros animados
-- IA dos Curiácios com simulações automáticas de aprendizado
-- Histórico de partidas
-- Gráfico de desempenho
+- IA com aprendizado básico usando localStorage
+- Estatísticas visuais do treinamento
+- Interface simples e interativa
+- Botões para treinar, reiniciar e zerar IA
 
-## Como Executar
-
+Execute com:
 ```bash
-pip install -r requirements.txt
 streamlit run app.py
 ```
