@@ -16,7 +16,7 @@
     justify-content: flex-start;
     align-items: center;
     overflow-x: hidden;
-    padding-top: 10px; /* Pequeno padding no topo para evitar corte */
+    padding: 10px 0; /* Padding para evitar corte no topo e base */
   }
   #tabuleiro {
     display: grid;
@@ -25,7 +25,7 @@
     max-width: 500px;
     border: 4px solid #333;
     aspect-ratio: 7 / 8;
-    margin: 0 0 20px 0; /* Margem inferior para separar do botão */
+    margin: 0 0 30px 0; /* Aumenta margem inferior para evitar sobreposição nos celulares */
   }
   .casa {
     width: 100%;
@@ -54,7 +54,8 @@
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin: 20px 0; /* Aumenta a margem superior para evitar sobreposição */
+    margin: 20px 0; /* Margem ajustada */
+    width: 100%; /* Garante que os botões usem a largura disponível */
   }
   #grafico {
     display: block;
@@ -66,14 +67,14 @@
   /* Media Query para telas menores (ex.: celulares) */
   @media (max-height: 700px) {
     #tabuleiro {
-      grid-template-rows: repeat(8, 45px);
-      margin: 0 0 15px 0; /* Margem inferior reduzida para telas pequenas */
+      grid-template-rows: repeat(8, 45px); /* Reduz altura das casas */
+      margin: 0 0 25px 0; /* Aumenta margem inferior para celulares */
     }
     .casa {
-      font-size: 20px;
+      font-size: 20px; /* Ajusta fonte */
     }
     #grafico {
-      height: 100px;
+      height: 100px; /* Reduz altura do canvas */
     }
     .botoes {
       margin: 15px 0; /* Margem ajustada para telas pequenas */
@@ -87,18 +88,42 @@
     #grafico {
       max-width: 100%;
     }
+    .botoes {
+      flex-direction: column; /* Empilha botões em telas muito estreitas */
+      gap: 5px; /* Reduz espaço entre botões */
+    }
+  }
+
+  /* Media Query para evitar barra de rolagem no PC */
+  @media (min-width: 768px) {
+    body {
+      max-height: 100vh; /* Limita a altura ao tamanho da viewport */
+      overflow-y: auto; /* Permite rolagem apenas se necessário */
+    }
+    .container {
+      flex: 1 0 auto; /* Garante que o conteúdo ocupe o espaço disponível */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100%;
+    }
+    #tabuleiro, .botoes, #grafico {
+      flex-shrink: 0; /* Evita que os elementos encolham demais */
+    }
   }
 </style>
 </head>
 <body onload="estadoInicial()">
-<div id="tabuleiro"></div>
-<div class="botoes">
-  <button onclick="treinarIA()">Treinar os Curiácios</button>
-  <button onclick="estadoInicial()">Reiniciar o Jogo</button>
-  <button onclick="zerarTreinamento()">Zerar o Treinamento</button>
+<div class="container">
+  <div id="tabuleiro"></div>
+  <div class="botoes">
+    <button onclick="treinarIA()">Treinar os Curiácios</button>
+    <button onclick="estadoInicial()">Reiniciar o Jogo</button>
+    <button onclick="zerarTreinamento()">Zerar o Treinamento</button>
+  </div>
+  <div id="mensagemFinal"></div>
+  <canvas id="grafico" width="500" height="150"></canvas>
 </div>
-<div id="mensagemFinal"></div>
-<canvas id="grafico" width="500" height="150"></canvas>
 <script>
 let pecas, donos, selecionado = null, movimentosValidos = [], semCaptura = 0;
 let resultados = JSON.parse(localStorage.getItem("resultados") || "[]");
