@@ -13,8 +13,9 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Altera para flex-start para evitar centralização excessiva em telas pequenas */
     align-items: center;
+    overflow-x: hidden; /* Evita rolagem horizontal */
   }
   #tabuleiro {
     display: grid;
@@ -58,6 +59,33 @@
     display: block;
     margin: 10px 0 0 0;
     max-width: 500px;
+    height: 150px; /* Reduz a altura padrão para telas menores */
+  }
+
+  /* Media Query para telas menores (ex.: celulares) */
+  @media (max-height: 700px) {
+    #tabuleiro {
+      grid-template-rows: repeat(8, 45px); /* Reduz a altura das casas */
+      margin: 0.5rem 0; /* Reduz margem */
+    }
+    .casa {
+      font-size: 20px; /* Ajusta o tamanho da fonte */
+    }
+    #grafico {
+      height: 100px; /* Reduz ainda mais a altura do canvas */
+    }
+    .botoes {
+      margin: 5px 0; /* Reduz margem dos botões */
+    }
+  }
+
+  @media (max-width: 500px) {
+    #tabuleiro {
+      max-width: 100%; /* Ajusta o tabuleiro para a largura da tela */
+    }
+    #grafico {
+      max-width: 100%; /* Ajusta o canvas para a largura da tela */
+    }
   }
 </style>
 </head>
@@ -69,7 +97,7 @@
   <button onclick="zerarTreinamento()">Zerar o Treinamento</button>
 </div>
 <div id="mensagemFinal"></div>
-<canvas id="grafico" width="500" height="200"></canvas>
+<canvas id="grafico" width="500" height="150"></canvas> <!-- Altura inicial reduzida -->
 <script>
 let pecas, donos, selecionado = null, movimentosValidos = [], semCaptura = 0;
 let resultados = JSON.parse(localStorage.getItem("resultados") || "[]");
@@ -146,7 +174,7 @@ function cliqueCasa(coord) {
 
 function gerarMovimentosValidos(origem) {
   const tipo = pecas[origem];
-  const movimentos = []; // Corrigido: inicializa como array vazio
+  const movimentos = [];
   const col0 = origem.charCodeAt(0);
   const row0 = parseInt(origem[1]);
   const alcance = tipo === '🏹' ? 3 : tipo === '🗡️' ? 2 : 1;
