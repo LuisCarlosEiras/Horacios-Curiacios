@@ -4,7 +4,7 @@ import os
 
 st.set_page_config(page_title="Horácios e Curiácios", layout="wide")
 
-st.markdown("## Jogo: Os Horácios e os Curiácios")
+st.markdown("## Os Horácios e os Curiácios")
 
 # Resultado da partida
 resultado = st.query_params.get("resultado", [None])[0]
