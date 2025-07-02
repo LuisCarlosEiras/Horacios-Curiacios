@@ -2,24 +2,37 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Adicionado para responsividade -->
 <title>Horácios e Curiácios</title>
 <style>
-  body { font-family: sans-serif; text-align: center; background: #eee; }
+  body { 
+    font-family: sans-serif; 
+    text-align: center; 
+    background: #eee; 
+    margin: 0; /* Remove margem padrão do body */
+    min-height: 100vh; /* Garante que o body ocupe a altura da viewport */
+    display: flex; /* Usa flexbox para centralizar */
+    flex-direction: column; /* Alinha os elementos em coluna */
+    justify-content: center; /* Centraliza verticalmente */
+    align-items: center; /* Centraliza horizontalmente */
+  }
   #tabuleiro {
     display: grid;
-    /* Ajuste 1: Faz as colunas ocuparem todo o espaço disponível, eliminando a margem */
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(8, 60px);
-    max-width: 500px; /* Define uma largura máxima para não ficar excessivo em telas grandes */
-    margin: 1rem auto;
+    max-width: 500px;
     border: 4px solid #333;
-    aspect-ratio: 7 / 8; /* Mantém a proporção correta das casas */
+    aspect-ratio: 7 / 8;
+    margin: 1rem 0; /* Reduz margem para apenas top/bottom */
   }
   .casa {
-    width: 100%; /* Ocupa toda a largura da célula da grade */
-    height: 100%; /* Ocupa toda a altura da célula da grade */
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; cursor: pointer;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
     position: relative;
   }
   .clara { background: #f0d9b5; }
@@ -28,7 +41,8 @@
   .destino-valido::after {
     content: "";
     position: absolute;
-    width: 80%; height: 80%;
+    width: 80%;
+    height: 80%;
     background-color: rgba(0,255,0,0.3);
     border-radius: 8px;
   }
@@ -38,7 +52,12 @@
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-top: 10px;
+    margin: 10px 0; /* Ajuste de margem para evitar espaço extra */
+  }
+  #grafico {
+    display: block;
+    margin: 10px 0 0 0; /* Remove margem inferior para evitar espaço extra */
+    max-width: 500px; /* Alinha com a largura do tabuleiro */
   }
 </style>
 </head>
@@ -50,7 +69,7 @@
   <button onclick="zerarTreinamento()">Zerar o Treinamento</button>
 </div>
 <div id="mensagemFinal"></div>
-<canvas id="grafico" width="500" height="200" style="display: block; margin: 20px auto;"></canvas>
+<canvas id="grafico" width="500" height="200"></canvas>
 <script>
 let pecas, donos, selecionado = null, movimentosValidos = [], semCaptura = 0;
 let resultados = JSON.parse(localStorage.getItem("resultados") || "[]");
@@ -127,7 +146,7 @@ function cliqueCasa(coord) {
 
 function gerarMovimentosValidos(origem) {
   const tipo = pecas[origem];
-  const movimentos = [];
+  const movimentos = twenty-sixthirty;
   const col0 = origem.charCodeAt(0);
   const row0 = parseInt(origem[1]);
   const alcance = tipo === '🏹' ? 3 : tipo === '🗡️' ? 2 : 1;
@@ -251,7 +270,6 @@ function desenharGrafico() {
   const total = resultados.length > 0 ? resultados.length : 1;
 
   const barWidth = 40;
-  /* Ajuste 2: Aumentei a margem de 60 para 80 para separar mais as barras */
   const barMargin = 80;
   const maxBarHeight = h - 40;
   const yOffset = h - 20;
@@ -260,18 +278,15 @@ function desenharGrafico() {
   ctx.fillStyle = "#333";
   ctx.textAlign = "center";
   
-  // Lógica de centralização para as 3 barras
   const totalGraphicWidth = (barWidth * 3) + (barMargin * 2);
   let startX = (w - totalGraphicWidth) / 2;
 
-  // Barra Horácios
   const hHeight = (hCount / total) * maxBarHeight;
   ctx.fillStyle = "rgba(0, 120, 255, 0.7)";
   ctx.fillRect(startX, yOffset - hHeight, barWidth, hHeight);
   ctx.fillStyle = "#333";
   ctx.fillText(`Horácios: ${hCount}`, startX + barWidth / 2, yOffset + 15);
 
-  // Barra Curiácios
   startX += barWidth + barMargin;
   const cHeight = (cCount / total) * maxBarHeight;
   ctx.fillStyle = "rgba(255, 50, 50, 0.7)";
@@ -279,7 +294,6 @@ function desenharGrafico() {
   ctx.fillStyle = "#333";
   ctx.fillText(`Curiácios: ${cCount}`, startX + barWidth / 2, yOffset + 15);
 
-  // Barra Paz
   startX += barWidth + barMargin;
   const pHeight = (pCount / total) * maxBarHeight;
   ctx.fillStyle = "rgba(128, 128, 128, 0.7)";
