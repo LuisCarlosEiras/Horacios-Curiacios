@@ -2,9 +2,11 @@ import streamlit as st
 import streamlit.components.v1 as components
 import os
 
-st.set_page_config(page_title="Horácios e Curiácios", layout="wide")
+# Ajuste 1: Configuração da página para layout centralizado (padrão)
+st.set_page_config(page_title="Horácios e Curiácios")
 
-st.markdown("## Os Horácios e os Curiácios")
+# Ajuste 1: Centralização do título usando HTML no markdown
+st.markdown("<h2 style='text-align: center;'>Os Horácios e os Curiácios</h2>", unsafe_allow_html=True)
 
 # Resultado da partida
 resultado = st.query_params.get("resultado", [None])[0]
