@@ -7,13 +7,17 @@
   body { font-family: sans-serif; text-align: center; background: #eee; }
   #tabuleiro {
     display: grid;
-    grid-template-columns: repeat(7, 60px);
+    /* Ajuste 1: Faz as colunas ocuparem todo o espaço disponível, eliminando a margem */
+    grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(8, 60px);
+    max-width: 500px; /* Define uma largura máxima para não ficar excessivo em telas grandes */
     margin: 1rem auto;
     border: 4px solid #333;
+    aspect-ratio: 7 / 8; /* Mantém a proporção correta das casas */
   }
   .casa {
-    width: 60px; height: 60px;
+    width: 100%; /* Ocupa toda a largura da célula da grade */
+    height: 100%; /* Ocupa toda a altura da célula da grade */
     display: flex; align-items: center; justify-content: center;
     font-size: 28px; cursor: pointer;
     position: relative;
@@ -176,7 +180,7 @@ function verificarFim() {
   const c = valores.filter(v => v === 'C').length;
   if (h === 0) return fimDeJogo("C");
   if (c === 0) return fimDeJogo("H");
-  if (semCaptura >= 50) return fimDeJogo("P"); // Aumentado para evitar empates rápidos
+  if (semCaptura >= 50) return fimDeJogo("P");
 }
 
 function fimDeJogo(resultado) {
@@ -193,17 +197,15 @@ function treinarIA() {
     let profundidade = 0;
     estadoInicial();
     while (document.getElementById('mensagemFinal').innerText === '' && profundidade < 100) {
-      // Alterna jogadas para um treinamento mais realista
       jogadaCuriacio();
       if(document.getElementById('mensagemFinal').innerText !== '') break;
-      jogadaHoracioIA(); // Simula uma jogada aleatória dos Horácios
+      jogadaHoracioIA();
       profundidade++;
     }
   }
-  estadoInicial(); // Reinicia para o jogador
+  estadoInicial();
 }
 
-// Simula uma jogada simples para os Horácios durante o treinamento
 function jogadaHoracioIA() {
     let melhor = null;
     let valorMax = -Infinity;
@@ -230,12 +232,10 @@ function jogadaHoracioIA() {
     }
 }
 
-
-// Ajuste 4: Nova função para limpar o localStorage
 function zerarTreinamento() {
   localStorage.removeItem("resultados");
-  resultados = []; // Limpa o array em memória
-  estadoInicial(); // Reinicia o jogo e redesenha o gráfico limpo
+  resultados = [];
+  estadoInicial();
 }
 
 function desenharGrafico() {
@@ -250,38 +250,43 @@ function desenharGrafico() {
   let pCount = resultados.filter(r => r === 'P').length;
   const total = resultados.length > 0 ? resultados.length : 1;
 
-  // Ajuste 2 e 3: Remove placar de texto e melhora o visual do gráfico
   const barWidth = 40;
-  const barMargin = 60;
-  const maxBarHeight = h - 40; // Deixa espaço para o texto
+  /* Ajuste 2: Aumentei a margem de 60 para 80 para separar mais as barras */
+  const barMargin = 80;
+  const maxBarHeight = h - 40;
   const yOffset = h - 20;
 
   ctx.font = "14px sans-serif";
   ctx.fillStyle = "#333";
   ctx.textAlign = "center";
   
+  // Lógica de centralização para as 3 barras
+  const totalGraphicWidth = (barWidth * 3) + (barMargin * 2);
+  let startX = (w - totalGraphicWidth) / 2;
+
   // Barra Horácios
   const hHeight = (hCount / total) * maxBarHeight;
   ctx.fillStyle = "rgba(0, 120, 255, 0.7)";
-  ctx.fillRect(w/2 - barMargin - barWidth, yOffset - hHeight, barWidth, hHeight);
+  ctx.fillRect(startX, yOffset - hHeight, barWidth, hHeight);
   ctx.fillStyle = "#333";
-  ctx.fillText(`Horácios: ${hCount}`, w/2 - barMargin - barWidth/2, yOffset + 15);
+  ctx.fillText(`Horácios: ${hCount}`, startX + barWidth / 2, yOffset + 15);
 
   // Barra Curiácios
+  startX += barWidth + barMargin;
   const cHeight = (cCount / total) * maxBarHeight;
   ctx.fillStyle = "rgba(255, 50, 50, 0.7)";
-  ctx.fillRect(w/2 - barWidth/2, yOffset - cHeight, barWidth, cHeight);
+  ctx.fillRect(startX, yOffset - cHeight, barWidth, cHeight);
   ctx.fillStyle = "#333";
-  ctx.fillText(`Curiácios: ${cCount}`, w/2, yOffset + 15);
+  ctx.fillText(`Curiácios: ${cCount}`, startX + barWidth / 2, yOffset + 15);
 
   // Barra Paz
+  startX += barWidth + barMargin;
   const pHeight = (pCount / total) * maxBarHeight;
   ctx.fillStyle = "rgba(128, 128, 128, 0.7)";
-  ctx.fillRect(w/2 + barMargin, yOffset - pHeight, barWidth, pHeight);
+  ctx.fillRect(startX, yOffset - pHeight, barWidth, pHeight);
   ctx.fillStyle = "#333";
-  ctx.fillText(`Paz: ${pCount}`, w/2 + barMargin + barWidth/2, yOffset + 15);
+  ctx.fillText(`Paz: ${pCount}`, startX + barWidth / 2, yOffset + 15);
   
-  // Linha de base
   ctx.beginPath();
   ctx.moveTo(0, yOffset);
   ctx.lineTo(w, yOffset);
