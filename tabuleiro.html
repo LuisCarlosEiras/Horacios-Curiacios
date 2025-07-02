@@ -2,19 +2,19 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Adicionado para responsividade -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Horácios e Curiácios</title>
 <style>
   body { 
     font-family: sans-serif; 
     text-align: center; 
     background: #eee; 
-    margin: 0; /* Remove margem padrão do body */
-    min-height: 100vh; /* Garante que o body ocupe a altura da viewport */
-    display: flex; /* Usa flexbox para centralizar */
-    flex-direction: column; /* Alinha os elementos em coluna */
-    justify-content: center; /* Centraliza verticalmente */
-    align-items: center; /* Centraliza horizontalmente */
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
   #tabuleiro {
     display: grid;
@@ -23,7 +23,7 @@
     max-width: 500px;
     border: 4px solid #333;
     aspect-ratio: 7 / 8;
-    margin: 1rem 0; /* Reduz margem para apenas top/bottom */
+    margin: 1rem 0;
   }
   .casa {
     width: 100%;
@@ -52,12 +52,12 @@
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin: 10px 0; /* Ajuste de margem para evitar espaço extra */
+    margin: 10px 0;
   }
   #grafico {
     display: block;
-    margin: 10px 0 0 0; /* Remove margem inferior para evitar espaço extra */
-    max-width: 500px; /* Alinha com a largura do tabuleiro */
+    margin: 10px 0 0 0;
+    max-width: 500px;
   }
 </style>
 </head>
@@ -146,7 +146,7 @@ function cliqueCasa(coord) {
 
 function gerarMovimentosValidos(origem) {
   const tipo = pecas[origem];
-  const movimentos = twenty-sixthirty;
+  const movimentos = []; // Corrigido: inicializa como array vazio
   const col0 = origem.charCodeAt(0);
   const row0 = parseInt(origem[1]);
   const alcance = tipo === '🏹' ? 3 : tipo === '🗡️' ? 2 : 1;
@@ -217,7 +217,7 @@ function treinarIA() {
     estadoInicial();
     while (document.getElementById('mensagemFinal').innerText === '' && profundidade < 100) {
       jogadaCuriacio();
-      if(document.getElementById('mensagemFinal').innerText !== '') break;
+      if (document.getElementById('mensagemFinal').innerText !== '') break;
       jogadaHoracioIA();
       profundidade++;
     }
@@ -226,29 +226,29 @@ function treinarIA() {
 }
 
 function jogadaHoracioIA() {
-    let melhor = null;
-    let valorMax = -Infinity;
-    for (const pos in pecas) {
-        if (donos[pos] !== 'H') continue;
-        const moves = gerarMovimentosValidos(pos);
-        for (const destino of moves) {
-            const peso = Math.random() + (pecas[destino] ? 1 : 0);
-            if (peso > valorMax) {
-                valorMax = peso;
-                melhor = { origem: pos, destino };
-            }
-        }
+  let melhor = null;
+  let valorMax = -Infinity;
+  for (const pos in pecas) {
+    if (donos[pos] !== 'H') continue;
+    const moves = gerarMovimentosValidos(pos);
+    for (const destino of moves) {
+      const peso = Math.random() + (pecas[destino] ? 1 : 0);
+      if (peso > valorMax) {
+        valorMax = peso;
+        melhor = { origem: pos, destino };
+      }
     }
-    if (melhor) {
-        const captura = !!pecas[melhor.destino];
-        pecas[melhor.destino] = pecas[melhor.origem];
-        donos[melhor.destino] = 'H';
-        delete pecas[melhor.origem];
-        delete donos[melhor.origem];
-        if (captura) semCaptura = 0; else semCaptura++;
-        atualizarTabuleiro();
-        verificarFim();
-    }
+  }
+  if (melhor) {
+    const captura = !!pecas[melhor.destino];
+    pecas[melhor.destino] = pecas[melhor.origem];
+    donos[melhor.destino] = 'H';
+    delete pecas[melhor.origem];
+    delete donos[melhor.origem];
+    if (captura) semCaptura = 0; else semCaptura++;
+    atualizarTabuleiro();
+    verificarFim();
+  }
 }
 
 function zerarTreinamento() {
