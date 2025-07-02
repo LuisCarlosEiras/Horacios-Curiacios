@@ -1,4 +1,229 @@
-<!DOCTYPE html>
+# Conteúdo completo e funcional de tabuleiro.html com todas as funcionalidades mencionadas
+tabuleiro_html_full = """<!DOCTYPE html>
 <html lang="pt-br">
-<!-- Full HTML content was inserted previously. Reuse and embed here -->
-</html>
+<head>
+<meta charset="UTF-8">
+<title>Horácios e Curiácios</title>
+<style>
+  body { font-family: sans-serif; text-align: center; background: #eee; }
+  #tabuleiro {
+    display: grid;
+    grid-template-columns: repeat(7, 60px);
+    grid-template-rows: repeat(8, 60px);
+    margin: 1rem auto;
+    border: 4px solid #333;
+  }
+  .casa {
+    width: 60px; height: 60px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; cursor: pointer;
+    position: relative;
+  }
+  .clara { background: #f0d9b5; }
+  .escura { background: #b58863; }
+  .selecionada { outline: 3px solid red; }
+  .destino-valido::after {
+    content: "";
+    position: absolute;
+    width: 80%; height: 80%;
+    background-color: rgba(0,255,0,0.3);
+    border-radius: 8px;
+  }
+  .horacio { background-color: rgba(0,120,255,0.3); border-radius: 50%; padding: 5px; }
+  .curiacio { background-color: rgba(255,50,50,0.4); border-radius: 50%; padding: 5px; }
+  .botoes {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body onload="estadoInicial()">
+<h2>Tabuleiro</h2>
+<div id="tabuleiro"></div>
+<div class="botoes">
+  <button onclick="treinarIA()">Treinar Curiácios</button>
+  <button onclick="estadoInicial()">Reiniciar o Jogo</button>
+</div>
+<div id="mensagemFinal"></div>
+<canvas id="grafico" width="500" height="300" style="display: block; margin: 20px auto;"></canvas>
+<script>
+let pecas, donos, selecionado = null, movimentosValidos = [], semCaptura = 0;
+let resultados = JSON.parse(localStorage.getItem("resultados") || "[]");
+
+function estadoInicial() {
+  pecas = {
+    'C8': '🏹', 'D8': '🏹', 'E8': '🏹',
+    'C7': '🗡️', 'D7': '🗡️', 'E7': '🗡️',
+    'C6': '⚔️', 'D6': '⚔️', 'E6': '⚔️',
+    'C1': '🏹', 'D1': '🏹', 'E1': '🏹',
+    'C2': '🗡️', 'D2': '🗡️', 'E2': '🗡️',
+    'C3': '⚔️', 'D3': '⚔️', 'E3': '⚔️'
+  };
+  donos = {};
+  for (const pos in pecas) donos[pos] = parseInt(pos[1]) >= 6 ? 'C' : 'H';
+  selecionado = null;
+  movimentosValidos = [];
+  semCaptura = 0;
+  document.getElementById('mensagemFinal').innerText = '';
+  atualizarTabuleiro();
+  desenharGrafico();
+}
+
+function atualizarTabuleiro() {
+  const tabuleiro = document.getElementById('tabuleiro');
+  tabuleiro.innerHTML = '';
+  for (let row = 8; row >= 1; row--) {
+    for (let col = 0; col < 7; col++) {
+      const letra = String.fromCharCode(65 + col);
+      const coord = letra + row;
+      const casa = document.createElement('div');
+      casa.className = 'casa ' + ((row + col) % 2 === 0 ? 'clara' : 'escura');
+      if (selecionado === coord) casa.classList.add('selecionada');
+      if (movimentosValidos.includes(coord)) casa.classList.add('destino-valido');
+      casa.onclick = () => cliqueCasa(coord);
+
+      const peca = pecas[coord];
+      if (peca) {
+        const span = document.createElement('span');
+        span.textContent = peca;
+        span.className = donos[coord] === 'H' ? 'horacio' : 'curiacio';
+        casa.appendChild(span);
+      }
+      tabuleiro.appendChild(casa);
+    }
+  }
+}
+
+function cliqueCasa(coord) {
+  if (selecionado) {
+    if (movimentosValidos.includes(coord)) {
+      const captura = !!pecas[coord];
+      pecas[coord] = pecas[selecionado];
+      donos[coord] = donos[selecionado];
+      delete pecas[selecionado];
+      delete donos[selecionado];
+      selecionado = null;
+      movimentosValidos = [];
+      if (captura) semCaptura = 0; else semCaptura++;
+      atualizarTabuleiro();
+      verificarFim();
+      setTimeout(jogadaCuriacio, 300);
+    } else {
+      selecionado = null;
+      movimentosValidos = [];
+      atualizarTabuleiro();
+    }
+  } else if (pecas[coord] && donos[coord] === 'H') {
+    selecionado = coord;
+    movimentosValidos = gerarMovimentosValidos(coord);
+    atualizarTabuleiro();
+  }
+}
+
+function gerarMovimentosValidos(origem) {
+  const tipo = pecas[origem];
+  const movimentos = [];
+  const col0 = origem.charCodeAt(0);
+  const row0 = parseInt(origem[1]);
+  const alcance = tipo === '🏹' ? 3 : tipo === '🗡️' ? 2 : 1;
+
+  for (let dx = -alcance; dx <= alcance; dx++) {
+    for (let dy = -alcance; dy <= alcance; dy++) {
+      if (dx === 0 && dy === 0) continue;
+      const col = String.fromCharCode(col0 + dx);
+      const row = row0 + dy;
+      const destino = col + row;
+      if (col >= 'A' && col <= 'G' && row >= 1 && row <= 8) {
+        if (!pecas[destino] || donos[destino] !== donos[origem]) {
+          movimentos.push(destino);
+        }
+      }
+    }
+  }
+  return movimentos;
+}
+
+function jogadaCuriacio() {
+  let melhor = null;
+  let valorMax = -Infinity;
+  for (const pos in pecas) {
+    if (donos[pos] !== 'C') continue;
+    const moves = gerarMovimentosValidos(pos);
+    for (const destino of moves) {
+      const peso = Math.random() + (pecas[destino] ? 1 : 0);
+      if (peso > valorMax) {
+        valorMax = peso;
+        melhor = { origem: pos, destino };
+      }
+    }
+  }
+  if (melhor) {
+    const captura = !!pecas[melhor.destino];
+    pecas[melhor.destino] = pecas[melhor.origem];
+    donos[melhor.destino] = 'C';
+    delete pecas[melhor.origem];
+    delete donos[melhor.origem];
+    if (captura) semCaptura = 0; else semCaptura++;
+    atualizarTabuleiro();
+    verificarFim();
+  }
+}
+
+function verificarFim() {
+  const valores = Object.values(donos);
+  const h = valores.filter(v => v === 'H').length;
+  const c = valores.filter(v => v === 'C').length;
+  if (h === 0) return fimDeJogo("C");
+  if (c === 0) return fimDeJogo("H");
+  if (semCaptura >= 5) return fimDeJogo("P");
+}
+
+function fimDeJogo(resultado) {
+  let msg = resultado === 'H' ? "🏆 Vitória dos Horácios" : resultado === 'C' ? "🏆 Vitória dos Curiácios" : "🤝 Paz foi alcançada";
+  document.getElementById('mensagemFinal').innerText = msg;
+  resultados.push(resultado);
+  localStorage.setItem("resultados", JSON.stringify(resultados));
+  window.parent.postMessage("resultado=" + resultado, "*");
+  desenharGrafico();
+}
+
+function treinarIA() {
+  for (let i = 0; i < 10; i++) {
+    estadoInicial();
+    while (document.getElementById('mensagemFinal').innerText === '') {
+      jogadaCuriacio();
+    }
+  }
+  estadoInicial();
+}
+
+function desenharGrafico() {
+  const canvas = document.getElementById('grafico');
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const w = canvas.width, h = canvas.height;
+
+  let hCount = resultados.filter(r => r === 'H').length;
+  let cCount = resultados.filter(r => r === 'C').length;
+  let pCount = resultados.filter(r => r === 'P').length;
+  const total = resultados.length;
+
+  ctx.fillStyle = "#000";
+  ctx.fillText("Vitórias dos Horácios: " + hCount, 10, 20);
+  ctx.fillText("Vitórias dos Curiácios: " + cCount, 10, 40);
+  ctx.fillText("Paz: " + pCount, 10, 60);
+
+  ctx.fillStyle = "blue";
+  ctx.fillRect(10, 80, hCount * 5, 20);
+  ctx.fillStyle = "red";
+  ctx.fillRect(10, 110, cCount * 5, 20);
+  ctx.fillStyle = "gray";
+  ctx.fillRect(10, 140, pCount * 5, 20);
+}
+</script>
+</body>
+</html>"""
+
+
