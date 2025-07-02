@@ -16,16 +16,23 @@
     justify-content: flex-start;
     align-items: center;
     overflow-x: hidden;
-    padding: 10px 0; /* Padding para evitar corte no topo e base */
+    padding: 10px 0;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 500px; /* Limita a largura máxima do conteúdo */
+    flex: 1 0 auto; /* Ocupa o espaço disponível sem forçar rolagem */
   }
   #tabuleiro {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(8, 60px);
-    max-width: 500px;
+    max-width: 100%; /* Ajusta ao contêiner */
     border: 4px solid #333;
     aspect-ratio: 7 / 8;
-    margin: 0 0 30px 0; /* Aumenta margem inferior para evitar sobreposição nos celulares */
+    margin: 0 0 30px 0; /* Margem inferior para separar dos botões */
   }
   .casa {
     width: 100%;
@@ -54,61 +61,58 @@
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin: 20px 0; /* Margem ajustada */
-    width: 100%; /* Garante que os botões usem a largura disponível */
+    margin: 20px 0;
+    width: 100%;
   }
   #grafico {
     display: block;
     margin: 10px 0 0 0;
-    max-width: 500px;
+    max-width: 100%;
     height: 150px;
   }
 
   /* Media Query para telas menores (ex.: celulares) */
   @media (max-height: 700px) {
     #tabuleiro {
-      grid-template-rows: repeat(8, 45px); /* Reduz altura das casas */
-      margin: 0 0 25px 0; /* Aumenta margem inferior para celulares */
+      grid-template-rows: repeat(8, 45px);
+      margin: 0 0 25px 0;
     }
     .casa {
-      font-size: 20px; /* Ajusta fonte */
+      font-size: 20px;
     }
     #grafico {
-      height: 100px; /* Reduz altura do canvas */
+      height: 100px;
     }
     .botoes {
-      margin: 15px 0; /* Margem ajustada para telas pequenas */
+      margin: 15px 0;
     }
   }
 
-  @media (max-width: 500px) {
-    #tabuleiro {
-      max-width: 100%;
-    }
-    #grafico {
-      max-width: 100%;
-    }
+  /* Media Query para telas estreitas (ajuste opcional para botões) */
+  @media (max-width: 400px) { /* Ajuste o limite se necessário */
     .botoes {
-      flex-direction: column; /* Empilha botões em telas muito estreitas */
-      gap: 5px; /* Reduz espaço entre botões */
+      flex-wrap: wrap; /* Permite que os botões quebrem para a próxima linha se necessário */
+      justify-content: center;
+      gap: 5px;
+    }
+    button {
+      flex: 1 1 100px; /* Define uma largura mínima para os botões */
+      margin: 2px 0; /* Espaçamento vertical */
     }
   }
 
-  /* Media Query para evitar barra de rolagem no PC */
+  /* Media Query para PC e telas maiores */
   @media (min-width: 768px) {
     body {
-      max-height: 100vh; /* Limita a altura ao tamanho da viewport */
-      overflow-y: auto; /* Permite rolagem apenas se necessário */
+      max-height: 100vh;
+      overflow-y: auto;
     }
     .container {
-      flex: 1 0 auto; /* Garante que o conteúdo ocupe o espaço disponível */
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 100%;
+      max-height: calc(100vh - 20px); /* Subtrai o padding do body */
+      overflow-y: auto; /* Rolagem apenas se necessário */
     }
     #tabuleiro, .botoes, #grafico {
-      flex-shrink: 0; /* Evita que os elementos encolham demais */
+      flex-shrink: 0;
     }
   }
 </style>
