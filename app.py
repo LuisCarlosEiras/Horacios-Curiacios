@@ -6,7 +6,7 @@ import os
 st.set_page_config(page_title="Horácios e Curiácios")
 
 # Ajuste 1: Centralização do título usando HTML no markdown
-st.markdown("<h2 style='text-align: center;'>Os Horácios(você,🔵) e os Curiácios(IA,🔴)</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>Os Horácios, você(🔵) e os Curiácios, IA(🔴)</h2>", unsafe_allow_html=True)
 
 # Resultado da partida
 resultado = st.query_params.get("resultado", [None])[0]
