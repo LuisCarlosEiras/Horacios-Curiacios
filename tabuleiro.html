@@ -74,21 +74,24 @@
   .botoes {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
     width: 100%;
-    max-width: 400px;
+    max-width: 600px;
   }
   
   .botoes button {
-    padding: 8px 12px;
-    font-size: 12px;
+    padding: 8px 10px;
+    font-size: 11px;
     background: #4CAF50;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     white-space: nowrap;
+    flex: 1;
+    text-align: center;
+    min-width: 120px;
   }
   
   .botoes button:hover {
@@ -125,9 +128,16 @@
       font-size: 20px;
     }
     
+    .botoes {
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
     .botoes button {
-      padding: 6px 8px;
-      font-size: 10px;
+      padding: 6px 6px;
+      font-size: 9px;
+      flex: 1 1 auto;
+      min-width: 90px;
     }
     
     #grafico {
@@ -150,9 +160,14 @@
       font-size: 32px;
     }
     
+    .botoes {
+      max-width: 500px;
+    }
+    
     .botoes button {
-      padding: 10px 15px;
-      font-size: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+      min-width: 140px;
     }
     
     #grafico {
@@ -175,9 +190,14 @@
       font-size: 36px;
     }
     
+    .botoes {
+      max-width: 600px;
+    }
+    
     .botoes button {
-      padding: 12px 20px;
-      font-size: 16px;
+      padding: 12px 16px;
+      font-size: 14px;
+      min-width: 160px;
     }
     
     #grafico {
