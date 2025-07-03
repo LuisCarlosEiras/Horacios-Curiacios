@@ -5,36 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Horácios e Curiácios</title>
 <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
   body { 
     font-family: sans-serif; 
     text-align: center; 
     background: #eee; 
-    margin: 0;
-    min-height: 100vh; /* Mantém a altura mínima */
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    overflow-x: hidden;
-    padding: 10px 0;
+    overflow: hidden;
   }
+  
   .container {
     display: flex;
     flex-direction: column;
+    align-items: center;
     width: 100%;
     max-width: 500px;
-    flex: 1 0 auto; /* Ocupa o espaço disponível */
-    min-height: 0; /* Permite que o contêiner se ajuste */
+    height: 100vh;
+    padding: 10px;
+    justify-content: center;
+    gap: 15px;
   }
+  
   #tabuleiro {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(8, 60px);
-    max-width: 100%;
+    grid-template-rows: repeat(8, 1fr);
+    width: 100%;
+    max-width: 400px;
     border: 4px solid #333;
     aspect-ratio: 7 / 8;
-    margin: 0 0 30px 0; /* Margem inferior para separar dos botões */
+    flex-shrink: 0;
   }
+  
   .casa {
     width: 100%;
     height: 100%;
@@ -45,6 +56,7 @@
     cursor: pointer;
     position: relative;
   }
+  
   .clara { background: #f0d9b5; }
   .escura { background: #b58863; }
   .selecionada { outline: 3px solid red; }
@@ -58,69 +70,118 @@
   }
   .horacio { background-color: rgba(0,120,255,0.3); border-radius: 50%; padding: 5px; }
   .curiacio { background-color: rgba(255,50,50,0.4); border-radius: 50%; padding: 5px; }
+  
   .botoes {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin: 20px 0;
+    flex-wrap: wrap;
     width: 100%;
+    max-width: 400px;
   }
+  
+  .botoes button {
+    padding: 8px 12px;
+    font-size: 12px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  
+  .botoes button:hover {
+    background: #45a049;
+  }
+  
+  #mensagemFinal {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+    min-height: 20px;
+  }
+  
   #grafico {
     display: block;
-    margin: 10px 0 0 0;
-    max-width: 100%;
-    height: 150px;
+    width: 100%;
+    max-width: 400px;
+    height: 100px;
+    flex-shrink: 0;
   }
 
-  /* Media Query para telas menores (ex.: celulares) */
-  @media (max-height: 700px) {
-    #tabuleiro {
-      grid-template-rows: repeat(8, 45px);
-      margin: 0 0 25px 0;
+  /* Media Query para celulares pequenos */
+  @media (max-width: 480px) {
+    .container {
+      padding: 5px;
+      gap: 10px;
     }
+    
+    #tabuleiro {
+      max-width: 350px;
+    }
+    
     .casa {
       font-size: 20px;
     }
+    
+    .botoes button {
+      padding: 6px 8px;
+      font-size: 10px;
+    }
+    
     #grafico {
-      height: 100px;
-    }
-    .botoes {
-      margin: 15px 0;
+      height: 80px;
     }
   }
 
-  /* Media Query para telas estreitas (ajuste opcional para botões) */
-  @media (max-width: 400px) {
-    .botoes {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 5px;
-    }
-    button {
-      flex: 1 1 100px;
-      margin: 2px 0;
-    }
-  }
-
-  /* Media Query para tablets e PCs */
-  @media (min-width: 768px) {
-    body {
-      height: 100vh; /* Força a altura exata da viewport */
-      overflow-y: hidden; /* Remove rolagem desnecessária */
-    }
+  /* Media Query para tablets */
+  @media (min-width: 481px) and (max-width: 1024px) {
     .container {
-      height: 100%; /* Ocupa toda a altura do body */
-      overflow-y: auto; /* Rolagem apenas se o conteúdo exceder */
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      padding: 15px;
+      gap: 20px;
     }
+    
     #tabuleiro {
-      margin-bottom: 20px; /* Ajuste fino para tablets e PCs */
+      max-width: 450px;
     }
+    
+    .casa {
+      font-size: 32px;
+    }
+    
+    .botoes button {
+      padding: 10px 15px;
+      font-size: 14px;
+    }
+    
     #grafico {
-      flex-shrink: 0; /* Impede que o canvas encolha */
-      margin-bottom: 10px; /* Garante espaço na base */
+      height: 120px;
+    }
+  }
+
+  /* Media Query para PCs */
+  @media (min-width: 1025px) {
+    .container {
+      padding: 20px;
+      gap: 25px;
+    }
+    
+    #tabuleiro {
+      max-width: 500px;
+    }
+    
+    .casa {
+      font-size: 36px;
+    }
+    
+    .botoes button {
+      padding: 12px 20px;
+      font-size: 16px;
+    }
+    
+    #grafico {
+      height: 150px;
     }
   }
 </style>
@@ -138,7 +199,19 @@
 </div>
 <script>
 let pecas, donos, selecionado = null, movimentosValidos = [], semCaptura = 0;
-let resultados = JSON.parse(localStorage.getItem("resultados") || "[]");
+let resultados = [];
+
+// Substituir localStorage por armazenamento em memória
+function salvarResultados() {
+  // Em um ambiente real, você poderia usar uma API ou outro método de persistência
+  // Por enquanto, mantemos apenas em memória durante a sessão
+}
+
+function carregarResultados() {
+  // Em um ambiente real, você carregaria os dados de uma API
+  // Por enquanto, retornamos array vazio
+  return [];
+}
 
 function estadoInicial() {
   pecas = {
@@ -272,8 +345,10 @@ function fimDeJogo(resultado) {
   let msg = resultado === 'H' ? "🏆 Vitória dos Horácios" : resultado === 'C' ? "🏆 Vitória dos Curiácios" : "🤝 Paz foi alcançada";
   document.getElementById('mensagemFinal').innerText = msg;
   resultados.push(resultado);
-  localStorage.setItem("resultados", JSON.stringify(resultados));
-  window.parent.postMessage("resultado=" + resultado, "*");
+  salvarResultados();
+  if (window.parent && window.parent.postMessage) {
+    window.parent.postMessage("resultado=" + resultado, "*");
+  }
   desenharGrafico();
 }
 
@@ -318,8 +393,8 @@ function jogadaHoracioIA() {
 }
 
 function zerarTreinamento() {
-  localStorage.removeItem("resultados");
   resultados = [];
+  salvarResultados();
   estadoInicial();
 }
 
@@ -373,6 +448,9 @@ function desenharGrafico() {
   ctx.strokeStyle = "#ccc";
   ctx.stroke();
 }
+
+// Inicializar resultados
+resultados = carregarResultados();
 </script>
 </body>
 </html>
