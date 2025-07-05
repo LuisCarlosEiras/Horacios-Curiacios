@@ -12,12 +12,23 @@
     .clara { background-color: #f0d9b5; }
     .escura { background-color: #b58863; }
     .botoes { margin: 10px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-    button { padding: 10px; font-size: 14px; }
+    button {
+      padding: 10px;
+      font-size: 14px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
     #mensagemFinal { margin: 10px; font-size: 18px; font-weight: bold; }
     canvas { border: 1px solid #999; margin-top: 20px; }
   </style>
 </head>
-<body>
+<body onload="iniciarJogo()">
 <div class="container">
   <div id="tabuleiro"></div>
   <div class="botoes">
@@ -44,6 +55,11 @@ function carregarResultados() {
   historico = JSON.parse(localStorage.getItem('historico')) || [];
   const m = JSON.parse(localStorage.getItem('memoria'));
   if (m) Object.assign(memoria, m);
+}
+
+function iniciarJogo() {
+  carregarResultados();
+  estadoInicial();
 }
 
 function estadoInicial() {
@@ -74,18 +90,13 @@ function atualizarTabuleiro() {
         span.textContent = pecas[coord];
         div.appendChild(span);
       }
-      div.addEventListener('click', () => cliqueCasa(coord));
+      div.onclick = () => cliqueCasa(coord);
       tab.appendChild(div);
     }
   }
 }
 
 // ... (restante do código permanece inalterado)
-
-window.onload = () => {
-  carregarResultados();
-  estadoInicial();
-};
 </script>
 </body>
 </html>
