@@ -1,9 +1,18 @@
+Claro, entendi. A alteração é simples: ao final do ciclo de treinamento, o jogo será reiniciado silenciosamente, sem exibir a mensagem "Treinamento Concluído\!".
+
+Ajustei a função `treinarIA` para que, ao completar o número de jogos solicitados, ela apenas chame `estadoInicial()` (que já limpa a área de mensagem e reinicia o tabuleiro) e encerre.
+
+Aqui está o código completo com essa pequena alteração.
+
+### Programa Completo: Horácios e Curiácios v2.1
+
+```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Horácios e Curiácios v2</title>
+<title>Horácios e Curiácios v2.1</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   * {
@@ -348,13 +357,14 @@ function jogadaHoracioIA() {
 // --- TREINAMENTO E BOTÕES ---
 
 function treinarIA(numJogos) {
-  document.getElementById('mensagemFinal').innerText = `Treinando... (${numJogos} jogos)`;
+  document.getElementById('mensagemFinal').innerText = `Treinando...`;
   let jogosFeitos = 0;
   
   function proximoJogo() {
       if (jogosFeitos >= numJogos) {
-          estadoInicial(); // Reinicia o tabuleiro para o jogador
-          document.getElementById('mensagemFinal').innerText = 'Treinamento Concluído!';
+          // *** ALTERAÇÃO APLICADA AQUI ***
+          // Ao final, apenas reinicia o jogo sem exibir mensagem adicional.
+          estadoInicial(); 
           return;
       }
       
@@ -473,3 +483,4 @@ function desenharGraficoEvolucao() {
 </script>
 </body>
 </html>
+```
