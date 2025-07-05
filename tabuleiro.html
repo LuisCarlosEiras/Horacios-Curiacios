@@ -28,13 +28,13 @@
     canvas { border: 1px solid #999; margin-top: 20px; }
   </style>
 </head>
-<body onload="iniciarJogo()">
+<body>
 <div class="container">
   <div id="tabuleiro"></div>
   <div class="botoes">
-    <button onclick="treinarIA()">Treinar os Curiácios</button>
-    <button onclick="zerarTreinamento()">Zerar o Treinamento</button>
-    <button onclick="estadoInicial()">Reiniciar o Jogo</button>
+    <button id="btnTreinar">Treinar os Curiácios</button>
+    <button id="btnZerar">Zerar o Treinamento</button>
+    <button id="btnReiniciar">Reiniciar o Jogo</button>
   </div>
   <div id="mensagemFinal"></div>
   <canvas id="grafico" width="500" height="200"></canvas>
@@ -42,7 +42,7 @@
 <script>
 let pecas, donos, selecionado = null, movimentosValidos = [], semCaptura = 0;
 let resultados = [], historico = [];
-const memoria = {}; // Armazena jogadas boas para cada peca
+const memoria = {};
 
 function salvarResultados() {
   localStorage.setItem('resultados', JSON.stringify(resultados));
@@ -60,7 +60,12 @@ function carregarResultados() {
 function iniciarJogo() {
   carregarResultados();
   estadoInicial();
+  document.getElementById('btnTreinar').onclick = treinarIA;
+  document.getElementById('btnZerar').onclick = zerarTreinamento;
+  document.getElementById('btnReiniciar').onclick = estadoInicial;
 }
+
+window.onload = iniciarJogo;
 
 function estadoInicial() {
   pecas = {
@@ -90,13 +95,11 @@ function atualizarTabuleiro() {
         span.textContent = pecas[coord];
         div.appendChild(span);
       }
-      div.onclick = () => cliqueCasa(coord);
+      div.addEventListener('click', () => cliqueCasa(coord));
       tab.appendChild(div);
     }
   }
 }
-
-// ... (restante do código permanece inalterado)
 </script>
 </body>
 </html>
