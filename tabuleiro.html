@@ -1,210 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Horácios e Curiácios</title>
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body { 
-    font-family: sans-serif; 
-    text-align: center; 
-    background: #eee; 
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
-  
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 500px;
-    height: 100vh;
-    padding: 10px;
-    justify-content: center;
-    gap: 15px;
-  }
-  
-  #tabuleiro {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    width: 100%;
-    max-width: 400px;
-    border: 4px solid #333;
-    aspect-ratio: 7 / 8;
-    flex-shrink: 0;
-  }
-  
-  .casa {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    cursor: pointer;
-    position: relative;
-  }
-  
-  .clara { background: #f0d9b5; }
-  .escura { background: #b58863; }
-  .selecionada { outline: 3px solid red; }
-  .destino-valido::after {
-    content: "";
-    position: absolute;
-    width: 80%;
-    height: 80%;
-    background-color: rgba(0,255,0,0.3);
-    border-radius: 8px;
-  }
-  .horacio { background-color: rgba(0,120,255,0.3); border-radius: 50%; padding: 5px; }
-  .curiacio { background-color: rgba(255,50,50,0.4); border-radius: 50%; padding: 5px; }
-  
-  .botoes {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: nowrap;
-    width: 100%;
-    max-width: 600px;
-  }
-  
-  .botoes button {
-    padding: 8px 10px;
-    font-size: 11px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    white-space: nowrap;
-    flex: 1;
-    text-align: center;
-    min-width: 120px;
-  }
-  
-  .botoes button:hover {
-    background: #45a049;
-  }
-  
-  #mensagemFinal {
-    font-weight: bold;
-    font-size: 16px;
-    color: #333;
-    min-height: 20px;
-  }
-  
-  #grafico {
-    display: block;
-    width: 100%;
-    max-width: 400px;
-    height: 100px;
-    flex-shrink: 0;
-  }
-
-  /* Media Query para celulares pequenos */
-  @media (max-width: 480px) {
-    .container {
-      padding: 5px;
-      gap: 10px;
-    }
-    
-    #tabuleiro {
-      max-width: 350px;
-    }
-    
-    .casa {
-      font-size: 20px;
-    }
-    
-    .botoes {
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-    
-    .botoes button {
-      padding: 6px 6px;
-      font-size: 9px;
-      flex: 1 1 auto;
-      min-width: 90px;
-    }
-    
-    #grafico {
-      height: 80px;
-    }
-  }
-
-  /* Media Query para tablets */
-  @media (min-width: 481px) and (max-width: 1024px) {
-    .container {
-      padding: 15px;
-      gap: 20px;
-    }
-    
-    #tabuleiro {
-      max-width: 450px;
-    }
-    
-    .casa {
-      font-size: 32px;
-    }
-    
-    .botoes {
-      max-width: 500px;
-    }
-    
-    .botoes button {
-      padding: 10px 12px;
-      font-size: 13px;
-      min-width: 140px;
-    }
-    
-    #grafico {
-      height: 120px;
-    }
-  }
-
-  /* Media Query para PCs */
-  @media (min-width: 1025px) {
-    .container {
-      padding: 20px;
-      gap: 25px;
-    }
-    
-    #tabuleiro {
-      max-width: 500px;
-    }
-    
-    .casa {
-      font-size: 36px;
-    }
-    
-    .botoes {
-      max-width: 600px;
-    }
-    
-    .botoes button {
-      padding: 12px 16px;
-      font-size: 14px;
-      min-width: 160px;
-    }
-    
-    #grafico {
-      height: 150px;
-    }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horácios e Curiácios com Memória</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #eee; }
+    .container { display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    #tabuleiro { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(8, 1fr); gap: 1px; width: 350px; height: 400px; border: 3px solid #000; }
+    .casa { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+    .clara { background-color: #f0d9b5; }
+    .escura { background-color: #b58863; }
+    .botoes { margin: 10px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    button { padding: 10px; font-size: 14px; }
+    #mensagemFinal { margin: 10px; font-size: 18px; font-weight: bold; }
+    canvas { border: 1px solid #999; margin-top: 20px; }
+  </style>
 </head>
 <body onload="estadoInicial()">
 <div class="container">
@@ -215,32 +26,30 @@
     <button onclick="estadoInicial()">Reiniciar o Jogo</button>
   </div>
   <div id="mensagemFinal"></div>
-  <canvas id="grafico" width="500" height="150"></canvas>
+  <canvas id="grafico" width="500" height="200"></canvas>
 </div>
 <script>
 let pecas, donos, selecionado = null, movimentosValidos = [], semCaptura = 0;
-let resultados = [];
+let resultados = [], historico = [];
+const memoria = {}; // Armazena jogadas boas para cada peca
 
-// Substituir localStorage por armazenamento em memória
 function salvarResultados() {
-  // Em um ambiente real, você poderia usar uma API ou outro método de persistência
-  // Por enquanto, mantemos apenas em memória durante a sessão
+  localStorage.setItem('resultados', JSON.stringify(resultados));
+  localStorage.setItem('historico', JSON.stringify(historico));
+  localStorage.setItem('memoria', JSON.stringify(memoria));
 }
 
 function carregarResultados() {
-  // Em um ambiente real, você carregaria os dados de uma API
-  // Por enquanto, retornamos array vazio
-  return [];
+  resultados = JSON.parse(localStorage.getItem('resultados')) || [];
+  historico = JSON.parse(localStorage.getItem('historico')) || [];
+  const m = JSON.parse(localStorage.getItem('memoria'));
+  if (m) Object.assign(memoria, m);
 }
 
 function estadoInicial() {
   pecas = {
-    'C8': '🏹', 'D8': '🏹', 'E8': '🏹',
-    'C7': '🗡️', 'D7': '🗡️', 'E7': '🗡️',
-    'C6': '⚔️', 'D6': '⚔️', 'E6': '⚔️',
-    'C1': '🏹', 'D1': '🏹', 'E1': '🏹',
-    'C2': '🗡️', 'D2': '🗡️', 'E2': '🗡️',
-    'C3': '⚔️', 'D3': '⚔️', 'E3': '⚔️'
+    'C8': '🏹','D8': '🏹','E8': '🏹','C7': '🗡️','D7': '🗡️','E7': '🗡️','C6': '⚔️','D6': '⚔️','E6': '⚔️',
+    'C1': '🏹','D1': '🏹','E1': '🏹','C2': '🗡️','D2': '🗡️','E2': '🗡️','C3': '⚔️','D3': '⚔️','E3': '⚔️'
   };
   donos = {};
   for (const pos in pecas) donos[pos] = parseInt(pos[1]) >= 6 ? 'C' : 'H';
@@ -253,26 +62,16 @@ function estadoInicial() {
 }
 
 function atualizarTabuleiro() {
-  const tabuleiro = document.getElementById('tabuleiro');
-  tabuleiro.innerHTML = '';
-  for (let row = 8; row >= 1; row--) {
-    for (let col = 0; col < 7; col++) {
-      const letra = String.fromCharCode(65 + col);
-      const coord = letra + row;
-      const casa = document.createElement('div');
-      casa.className = 'casa ' + ((row + col) % 2 === 0 ? 'clara' : 'escura');
-      if (selecionado === coord) casa.classList.add('selecionada');
-      if (movimentosValidos.includes(coord)) casa.classList.add('destino-valido');
-      casa.onclick = () => cliqueCasa(coord);
-
-      const peca = pecas[coord];
-      if (peca) {
-        const span = document.createElement('span');
-        span.textContent = peca;
-        span.className = donos[coord] === 'H' ? 'horacio' : 'curiacio';
-        casa.appendChild(span);
-      }
-      tabuleiro.appendChild(casa);
+  const tab = document.getElementById('tabuleiro');
+  tab.innerHTML = '';
+  for (let r = 8; r >= 1; r--) {
+    for (let c = 0; c < 7; c++) {
+      const coord = String.fromCharCode(65 + c) + r;
+      const div = document.createElement('div');
+      div.className = 'casa ' + ((r + c) % 2 === 0 ? 'clara' : 'escura');
+      if (pecas[coord]) div.innerHTML = `<span>${pecas[coord]}</span>`;
+      div.onclick = () => cliqueCasa(coord);
+      tab.appendChild(div);
     }
   }
 }
@@ -283,18 +82,14 @@ function cliqueCasa(coord) {
       const captura = !!pecas[coord];
       pecas[coord] = pecas[selecionado];
       donos[coord] = donos[selecionado];
-      delete pecas[selecionado];
-      delete donos[selecionado];
-      selecionado = null;
-      movimentosValidos = [];
+      delete pecas[selecionado]; delete donos[selecionado];
+      selecionado = null; movimentosValidos = [];
       if (captura) semCaptura = 0; else semCaptura++;
       atualizarTabuleiro();
       verificarFim();
       setTimeout(jogadaCuriacio, 300);
     } else {
-      selecionado = null;
-      movimentosValidos = [];
-      atualizarTabuleiro();
+      selecionado = null; movimentosValidos = []; atualizarTabuleiro();
     }
   } else if (pecas[coord] && donos[coord] === 'H') {
     selecionado = coord;
@@ -305,25 +100,20 @@ function cliqueCasa(coord) {
 
 function gerarMovimentosValidos(origem) {
   const tipo = pecas[origem];
-  const movimentos = [];
-  const col0 = origem.charCodeAt(0);
-  const row0 = parseInt(origem[1]);
   const alcance = tipo === '🏹' ? 3 : tipo === '🗡️' ? 2 : 1;
-
+  const moves = [];
   for (let dx = -alcance; dx <= alcance; dx++) {
     for (let dy = -alcance; dy <= alcance; dy++) {
       if (dx === 0 && dy === 0) continue;
-      const col = String.fromCharCode(col0 + dx);
-      const row = row0 + dy;
-      const destino = col + row;
-      if (col >= 'A' && col <= 'G' && row >= 1 && row <= 8) {
-        if (!pecas[destino] || donos[destino] !== donos[origem]) {
-          movimentos.push(destino);
-        }
+      const c = String.fromCharCode(origem.charCodeAt(0) + dx);
+      const r = parseInt(origem[1]) + dy;
+      const destino = c + r;
+      if (c >= 'A' && c <= 'G' && r >= 1 && r <= 8) {
+        if (!pecas[destino] || donos[destino] !== donos[origem]) moves.push(destino);
       }
     }
   }
-  return movimentos;
+  return moves;
 }
 
 function jogadaCuriacio() {
@@ -333,10 +123,12 @@ function jogadaCuriacio() {
     if (donos[pos] !== 'C') continue;
     const moves = gerarMovimentosValidos(pos);
     for (const destino of moves) {
-      const peso = Math.random() + (pecas[destino] ? 1 : 0);
+      const chave = pos + '-' + destino;
+      if (!(chave in memoria)) memoria[chave] = 0;
+      const peso = memoria[chave] + (pecas[destino] ? 1 : 0) + Math.random();
       if (peso > valorMax) {
         valorMax = peso;
-        melhor = { origem: pos, destino };
+        melhor = { origem: pos, destino, chave };
       }
     }
   }
@@ -344,46 +136,11 @@ function jogadaCuriacio() {
     const captura = !!pecas[melhor.destino];
     pecas[melhor.destino] = pecas[melhor.origem];
     donos[melhor.destino] = 'C';
-    delete pecas[melhor.origem];
-    delete donos[melhor.origem];
+    delete pecas[melhor.origem]; delete donos[melhor.origem];
     if (captura) semCaptura = 0; else semCaptura++;
-    atualizarTabuleiro();
-    verificarFim();
+    historico.push(melhor.chave);
+    atualizarTabuleiro(); verificarFim();
   }
-}
-
-function verificarFim() {
-  const valores = Object.values(donos);
-  const h = valores.filter(v => v === 'H').length;
-  const c = valores.filter(v => v === 'C').length;
-  if (h === 0) return fimDeJogo("C");
-  if (c === 0) return fimDeJogo("H");
-  if (semCaptura >= 50) return fimDeJogo("P");
-}
-
-function fimDeJogo(resultado) {
-  let msg = resultado === 'H' ? "🏆 Vitória dos Horácios" : resultado === 'C' ? "🏆 Vitória dos Curiácios" : "🤝 Paz foi alcançada";
-  document.getElementById('mensagemFinal').innerText = msg;
-  resultados.push(resultado);
-  salvarResultados();
-  if (window.parent && window.parent.postMessage) {
-    window.parent.postMessage("resultado=" + resultado, "*");
-  }
-  desenharGrafico();
-}
-
-function treinarIA() {
-  for (let i = 0; i < 10; i++) {
-    let profundidade = 0;
-    estadoInicial();
-    while (document.getElementById('mensagemFinal').innerText === '' && profundidade < 100) {
-      jogadaCuriacio();
-      if (document.getElementById('mensagemFinal').innerText !== '') break;
-      jogadaHoracioIA();
-      profundidade++;
-    }
-  }
-  estadoInicial();
 }
 
 function jogadaHoracioIA() {
@@ -393,84 +150,81 @@ function jogadaHoracioIA() {
     if (donos[pos] !== 'H') continue;
     const moves = gerarMovimentosValidos(pos);
     for (const destino of moves) {
-      const peso = Math.random() + (pecas[destino] ? 1 : 0);
-      if (peso > valorMax) {
-        valorMax = peso;
-        melhor = { origem: pos, destino };
-      }
+      const peso = (pecas[destino] ? 1 : 0) + Math.random();
+      if (peso > valorMax) melhor = { origem: pos, destino };
     }
   }
   if (melhor) {
     const captura = !!pecas[melhor.destino];
     pecas[melhor.destino] = pecas[melhor.origem];
     donos[melhor.destino] = 'H';
-    delete pecas[melhor.origem];
-    delete donos[melhor.origem];
+    delete pecas[melhor.origem]; delete donos[melhor.origem];
     if (captura) semCaptura = 0; else semCaptura++;
-    atualizarTabuleiro();
-    verificarFim();
+    atualizarTabuleiro(); verificarFim();
   }
 }
 
+function verificarFim() {
+  const h = Object.values(donos).filter(v => v === 'H').length;
+  const c = Object.values(donos).filter(v => v === 'C').length;
+  if (h === 0) return fimDeJogo("C");
+  if (c === 0) return fimDeJogo("H");
+  if (semCaptura >= 50) return fimDeJogo("P");
+}
+
+function fimDeJogo(vencedor) {
+  resultados.push(vencedor);
+  document.getElementById('mensagemFinal').innerText = vencedor === 'H' ? '🏆 Vitória dos Horácios' : vencedor === 'C' ? '🏆 Vitória dos Curiácios' : '🤝 Paz';
+  if (vencedor === 'C') historico.forEach(k => memoria[k] += 1);
+  if (vencedor === 'H') historico.forEach(k => memoria[k] -= 1);
+  salvarResultados(); historico = [];
+  desenharGrafico();
+}
+
+function treinarIA() {
+  for (let i = 0; i < 10; i++) {
+    estadoInicial();
+    let p = 0;
+    while (!document.getElementById('mensagemFinal').innerText && p++ < 100) {
+      jogadaCuriacio();
+      if (document.getElementById('mensagemFinal').innerText) break;
+      jogadaHoracioIA();
+    }
+  }
+  estadoInicial();
+}
+
 function zerarTreinamento() {
-  resultados = [];
+  resultados = []; historico = [];
+  for (let k in memoria) delete memoria[k];
   salvarResultados();
   estadoInicial();
 }
 
 function desenharGrafico() {
-  const canvas = document.getElementById('grafico');
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const w = canvas.width;
-  const h = canvas.height;
+  const ctx = document.getElementById('grafico').getContext('2d');
+  ctx.clearRect(0, 0, 500, 200);
+  const h = resultados.filter(r => r === 'H').length;
+  const c = resultados.filter(r => r === 'C').length;
+  const p = resultados.filter(r => r === 'P').length;
+  const total = resultados.length || 1;
 
-  let hCount = resultados.filter(r => r === 'H').length;
-  let cCount = resultados.filter(r => r === 'C').length;
-  let pCount = resultados.filter(r => r === 'P').length;
-  const total = resultados.length > 0 ? resultados.length : 1;
+  const data = [h, c, p];
+  const cores = ['#0078ff', '#ff3333', '#aaa'];
+  const labels = ['Horácios', 'Curiácios', 'Paz'];
+  const max = Math.max(...data);
 
-  const barWidth = 40;
-  const barMargin = 80;
-  const maxBarHeight = h - 40;
-  const yOffset = h - 20;
-
-  ctx.font = "14px sans-serif";
-  ctx.fillStyle = "#333";
-  ctx.textAlign = "center";
-  
-  const totalGraphicWidth = (barWidth * 3) + (barMargin * 2);
-  let startX = (w - totalGraphicWidth) / 2;
-
-  const hHeight = (hCount / total) * maxBarHeight;
-  ctx.fillStyle = "rgba(0, 120, 255, 0.7)";
-  ctx.fillRect(startX, yOffset - hHeight, barWidth, hHeight);
-  ctx.fillStyle = "#333";
-  ctx.fillText(`Horácios: ${hCount}`, startX + barWidth / 2, yOffset + 15);
-
-  startX += barWidth + barMargin;
-  const cHeight = (cCount / total) * maxBarHeight;
-  ctx.fillStyle = "rgba(255, 50, 50, 0.7)";
-  ctx.fillRect(startX, yOffset - cHeight, barWidth, cHeight);
-  ctx.fillStyle = "#333";
-  ctx.fillText(`Curiácios: ${cCount}`, startX + barWidth / 2, yOffset + 15);
-
-  startX += barWidth + barMargin;
-  const pHeight = (pCount / total) * maxBarHeight;
-  ctx.fillStyle = "rgba(128, 128, 128, 0.7)";
-  ctx.fillRect(startX, yOffset - pHeight, barWidth, pHeight);
-  ctx.fillStyle = "#333";
-  ctx.fillText(`Paz: ${pCount}`, startX + barWidth / 2, yOffset + 15);
-  
-  ctx.beginPath();
-  ctx.moveTo(0, yOffset);
-  ctx.lineTo(w, yOffset);
-  ctx.strokeStyle = "#ccc";
-  ctx.stroke();
+  for (let i = 0; i < 3; i++) {
+    const x = 100 + i * 120;
+    const altura = (data[i] / total) * 150;
+    ctx.fillStyle = cores[i];
+    ctx.fillRect(x, 180 - altura, 40, altura);
+    ctx.fillStyle = '#000';
+    ctx.fillText(`${labels[i]}: ${data[i]}`, x + 20, 195);
+  }
 }
 
-// Inicializar resultados
-resultados = carregarResultados();
+carregarResultados();
 </script>
 </body>
 </html>
