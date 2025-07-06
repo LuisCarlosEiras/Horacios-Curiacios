@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Horácios e Curiácios v2.4 (Ataque Estratégico)</title>
@@ -21,6 +25,22 @@
     justify-content: center;
     align-items: center;
     padding: 10px;
+
+HTML
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registrado com sucesso:', registration.scope);
+        })
+        .catch(err => {
+          console.log('Falha no registro do Service Worker:', err);
+        });
+    });
+  }
+</script>
+
   }
   
   .container {
