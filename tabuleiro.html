@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horácios e Curiácios v2.4 (Ataque Estratégico)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body { 
+    font-family: sans-serif; 
+    text-align: center; 
+    background: #f4f4f4; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    gap: 15px;
+  }
+  
+  #tabuleiro {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 100%;
+    max-width: 400px;
+    border: 4px solid #333;
+    aspect-ratio: 7 / 8;
+  }
+  
+  .casa {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(20px, 5vw, 28px);
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .clara { background: #f0d9b5; }
+  .escura { background: #b58863; }
+  .selecionada { outline: 3px solid red; }
+  .destino-valido::after {
+    content: "";
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    background-color: rgba(0,255,0,0.3);
+    border-radius: 50%;
+  }
+  .horacio { background-color: rgba(0,120,255,0.3); border-radius: 50%; padding: 5px; }
+  .curiacio { background-color: rgba(255,50,50,0.4); border-radius: 50%; padding: 5px; }
+  
+  .botoes {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  .botoes button {
+    padding: 10px 12px;
+    font-size: 12px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .botoes button:hover { background: #45a049; }
+  
+  #mensagemFinal {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #d32f2f;
+    min-height: 25px;
+  }
+
+  .graficos-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .grafico-wrapper {
+    width: 100%;
+    height: 200px;
+  }
+
+</style>
+</head>
+<body onload="inicializacaoCompleta()">
+<div class="container">
+  <div id="tabuleiro"></div>
+  <div class="botoes">
+    <button onclick="treinarIA(10)">Treinar os Curiácios</button>
+    <button onclick="zerarTreinamento()">Zerar Treinamento</button>
+    <button onclick="estadoInicial()">Reiniciar Partida</button>
+  </div>
+  <div id="mensagemFinal"></div>
+  <div class="graficos-container">
+    <div class="grafico-wrapper">
+      <canvas id="graficoBarras"></canvas>
+    </div>
+    <div class="grafico-wrapper">
+      <canvas id="graficoEvolucao"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+let pecas, donos, selecionado = null, movimentosValidos = [], semCaptura = 0;
+let resultados = [];
+let graficoBarras, graficoEvolucao;
+
+// --- GERENCIAMENTO DE ESTADO E DADOS ---
+
+function salvarResultados() {
+  localStorage.setItem('resultadosHoraciosCuriacios', JSON.stringify(resultados));
+}
+
+function carregarResultados() {
+  const dadosSalvos = localStorage.getItem('resultadosHoraciosCuriacios');
+  return dadosSalvos ? JSON.parse(dadosSalvos) : [];
+}
+
+function inicializacaoCompleta() {
+  resultados = carregarResultados();
+  estadoInicial();
+  desenharGraficoBarras();
+  desenharGraficoEvolucao();
+}
+
+function estadoInicial() {
+  pecas = {
+    'C8': '🏹', 'D8': '🏹', 'E8': '🏹',
+    'C7': '🗡️', 'D7': '🗡️', 'E7': '🗡️',
+    'C6': '⚔️', 'D6': '⚔️', 'E6': '⚔️',
+    'C1': '🏹', 'D1': '🏹', 'E1': '🏹',
+    'C2': '🗡️', 'D2': '🗡️', 'E2': '🗡️',
+    'C3': '⚔️', 'D3': '⚔️', 'E3': '⚔️'
+  };
+  donos = {};
+  for (const pos in pecas) donos[pos] = parseInt(pos[1]) >= 6 ? 'C' : 'H';
+  selecionado = null;
+  movimentosValidos = [];
+  semCaptura = 0;
+  document.getElementById('mensagemFinal').innerText = '';
+  atualizarTabuleiro();
+}
+
+// --- LÓGICA DO JOGO E RENDERIZAÇÃO ---
+
+function atualizarTabuleiro() {
+  const tabuleiro = document.getElementById('tabuleiro');
+  tabuleiro.innerHTML = '';
+  for (let row = 8; row >= 1; row--) {
+    for (let col = 0; col < 7; col++) {
+      const letra = String.fromCharCode(65 + col);
+      const coord = letra + row;
+      const casa = document.createElement('div');
+      casa.className = 'casa ' + ((row + col) % 2 === 0 ? 'clara' : 'escura');
+      if (selecionado === coord) casa.classList.add('selecionada');
+      if (movimentosValidos.includes(coord)) casa.classList.add('destino-valido');
+      casa.onclick = () => cliqueCasa(coord);
+
+      const peca = pecas[coord];
+      if (peca) {
+        const span = document.createElement('span');
+        span.textContent = peca;
+        span.className = donos[coord] === 'H' ? 'horacio' : 'curiacio';
+        casa.appendChild(span);
+      }
+      tabuleiro.appendChild(casa);
+    }
+  }
+}
+
+function cliqueCasa(coord) {
+  if (selecionado) {
+    if (movimentosValidos.includes(coord)) {
+      moverPeca(selecionado, coord);
+      atualizarTabuleiro();
+      verificarFim();
+      setTimeout(jogadaCuriacio, 300);
+    } else {
+      selecionado = null;
+      movimentosValidos = [];
+      atualizarTabuleiro();
+    }
+  } else if (pecas[coord] && donos[coord] === 'H') {
+    selecionado = coord;
+    movimentosValidos = gerarMovimentosValidos(coord);
+    atualizarTabuleiro();
+  }
+}
+
+function moverPeca(origem, destino) {
+    const captura = !!pecas[destino];
+    pecas[destino] = pecas[origem];
+    donos[destino] = donos[origem];
+    delete pecas[origem];
+    delete donos[origem];
+    if (captura) semCaptura = 0; else semCaptura++;
+    selecionado = null;
+    movimentosValidos = [];
+}
+
+function gerarMovimentosValidos(origem) {
+  const tipo = pecas[origem];
+  if(!tipo) return [];
+  const movimentos = [];
+  const col0 = origem.charCodeAt(0);
+  const row0 = parseInt(origem[1]);
+  const alcance = tipo === '🏹' ? 3 : tipo === '🗡️' ? 2 : 1;
+
+  for (let dx = -alcance; dx <= alcance; dx++) {
+    for (let dy = -alcance; dy <= alcance; dy++) {
+      if (dx === 0 && dy === 0) continue;
+      const col = String.fromCharCode(col0 + dx);
+      const row = row0 + dy;
+      const destino = col + row;
+      if (col >= 'A' && col <= 'G' && row >= 1 && row <= 8) {
+        if (!pecas[destino] || donos[destino] !== donos[origem]) {
+          movimentos.push(destino);
+        }
+      }
+    }
+  }
+  return movimentos;
+}
+
+function verificarFim() {
+  if(document.getElementById('mensagemFinal').innerText !== '') return true;
+  const valores = Object.values(donos);
+  const h = valores.filter(v => v === 'H').length;
+  const c = valores.filter(v => v === 'C').length;
+  if (h === 0) return fimDeJogo("C");
+  if (c === 0) return fimDeJogo("H");
+  if (semCaptura >= 50) return fimDeJogo("P");
+  return false;
+}
+
+function fimDeJogo(resultado) {
+  let msg = resultado === 'H' ? "🏆 Vitória dos Horácios" : resultado === 'C' ? "🏆 Vitória dos Curiácios" : "🤝 Paz foi alcançada";
+  document.getElementById('mensagemFinal').innerText = msg;
+  resultados.push(resultado);
+  salvarResultados();
+  desenharGraficoBarras();
+  desenharGraficoEvolucao();
+  return true;
+}
+
+// --- INTELIGÊNCIA ARTIFICIAL ---
+
+function isSquareThreatenedBy(square, opponent) {
+  const opponentPieces = Object.keys(pecas).filter(pos => donos[pos] === opponent);
+  for (const pos of opponentPieces) {
+    const validMoves = gerarMovimentosValidos(pos);
+    if (validMoves.includes(square)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// *** FUNÇÃO DE AVALIAÇÃO MODIFICADA COM ANÁLISE DE RISCO ***
+function avaliarJogada(origem, destino, donoDaVez) {
+  let placar = 0;
+  const pecaMovida = pecas[origem];
+  const pecaCapturada = pecas[destino];
+  const oponente = donoDaVez === 'H' ? 'C' : 'H';
+
+  // 1. Incentivar capturas
+  if (pecaCapturada) {
+    if (pecaCapturada === '🏹') placar += 5;
+    else if (pecaCapturada === '🗡️') placar += 3;
+    else placar += 2;
+  }
+
+  // 2. Incentivar avanço e controle do centro
+  const linhaDestino = parseInt(destino[1]);
+  if (donoDaVez === 'C') { 
+    placar += (8 - linhaDestino) * 0.1;
+  } else {
+    placar += linhaDestino * 0.1;
+  }
+  const colunaDestino = destino.charAt(0);
+  if (['C', 'D', 'E'].includes(colunaDestino)) {
+    placar += 0.5;
+  }
+
+  // 3. Análise de Risco: Penalizar jogadas arriscadas
+  if (isSquareThreatenedBy(destino, oponente)) {
+    // Se a casa de destino está ameaçada, calcula o custo-benefício da troca.
+    // Subtrai o valor da peça que está se movendo.
+    let valorPecaMovida = 0;
+    if (pecaMovida === '🏹') valorPecaMovida = 5;
+    else if (pecaMovida === '🗡️') valorPecaMovida = 3;
+    else valorPecaMovida = 2;
+    
+    placar -= valorPecaMovida;
+  }
+  
+  // 4. Fator de desempate
+  placar += Math.random() * 0.2;
+  return placar;
+}
+
+function encontrarMelhorJogada(donoDaVez) {
+    // Lógica de Fuga dos Curiácios
+    if (donoDaVez === 'C') {
+        const cPecasPos = Object.keys(pecas).filter(pos => donos[pos] === 'C');
+        const cPecasCount = cPecasPos.length;
+        const totalGames = resultados.length;
+
+        if (totalGames > 50 && cPecasCount <= 3 && cPecasCount > 0) {
+            const pecasParaFugir = cPecasPos.filter(pos => parseInt(pos[1]) < 7);
+
+            if (pecasParaFugir.length > 0) {
+                let melhorJogadaDeFuga = null;
+                let placarMaxFuga = -Infinity;
+                
+                for (const origem of cPecasPos) {
+                    const movimentos = gerarMovimentosValidos(origem);
+                    for (const destino of movimentos) {
+                        let placarFuga = parseInt(destino[1]) * 2;
+                        if (pecas[destino] && donos[destino] === 'H') {
+                            placarFuga -= 50; 
+                        }
+                        if (isSquareThreatenedBy(destino, 'H')) {
+                            placarFuga -= 100;
+                        }
+                        placarFuga += Math.random() * 0.1;
+
+                        if (placarFuga > placarMaxFuga) {
+                            placarMaxFuga = placarFuga;
+                            melhorJogadaDeFuga = { origem, destino };
+                        }
+                    }
+                }
+                if(melhorJogadaDeFuga) return melhorJogadaDeFuga;
+            }
+        }
+    }
+
+    // Lógica de Ataque Padrão (agora com avaliação de risco)
+    let melhorJogada = null;
+    let placarMax = -Infinity;
+    for (const origem in pecas) {
+        if (donos[origem] !== donoDaVez) continue;
+        const movimentos = gerarMovimentosValidos(origem);
+        for (const destino of movimentos) {
+            const placar = avaliarJogada(origem, destino, donoDaVez);
+            if (placar > placarMax) {
+                placarMax = placar;
+                melhorJogada = { origem, destino };
+            }
+        }
+    }
+    return melhorJogada;
+}
+
+
+function jogadaCuriacio() {
+  if (verificarFim()) return;
+  const melhorJogada = encontrarMelhorJogada('C');
+  if (melhorJogada) {
+    moverPeca(melhorJogada.origem, melhorJogada.destino);
+    atualizarTabuleiro();
+    verificarFim();
+  }
+}
+
+function jogadaHoracioIA() {
+  if (verificarFim()) return;
+  const melhorJogada = encontrarMelhorJogada('H');
+  if (melhorJogada) {
+    moverPeca(melhorJogada.origem, melhorJogada.destino);
+  }
+}
+
+// --- TREINAMENTO E BOTÕES ---
+
+function treinarIA(numJogos) {
+  document.getElementById('mensagemFinal').innerText = `Treinando...`;
+  let jogosFeitos = 0;
+  
+  function proximoJogo() {
+      if (jogosFeitos >= numJogos) {
+          estadoInicial(); 
+          return;
+      }
+      
+      estadoInicial();
+      let profundidade = 0;
+      while (profundidade < 150) {
+          jogadaCuriacio();
+          if (verificarFim()) break;
+          jogadaHoracioIA();
+          if (verificarFim()) break;
+          profundidade++;
+      }
+      jogosFeitos++;
+      setTimeout(proximoJogo, 10);
+  }
+  proximoJogo();
+}
+
+
+function zerarTreinamento() {
+  resultados = [];
+  localStorage.removeItem('resultadosHoraciosCuriacios');
+  estadoInicial();
+  desenharGraficoBarras();
+  desenharGraficoEvolucao();
+}
+
+// --- GRÁFICOS (CHART.JS) ---
+
+function desenharGraficoBarras() {
+  const ctx = document.getElementById('graficoBarras').getContext('2d');
+  
+  const hCount = resultados.filter(r => r === 'H').length;
+  const cCount = resultados.filter(r => r === 'C').length;
+  const pCount = resultados.filter(r => r === 'P').length;
+
+  const data = {
+    labels: [`Horácios (${hCount})`, `Curiácios (${cCount})`, `Paz (${pCount})`],
+    datasets: [{
+      data: [hCount, cCount, pCount],
+      backgroundColor: ['rgba(0, 120, 255, 0.7)', 'rgba(255, 50, 50, 0.7)', 'rgba(128, 128, 128, 0.7)'],
+      borderColor: ['#0078FF', '#FF3232', '#808080'],
+      borderWidth: 1
+    }]
+  };
+
+  if (graficoBarras) {
+    graficoBarras.data = data;
+    graficoBarras.update();
+  } else {
+    graficoBarras = new Chart(ctx, {
+      type: 'bar',
+      data: data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: 'Histórico Geral de Resultados' }
+        },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+  }
+}
+
+function desenharGraficoEvolucao() {
+    const ctx = document.getElementById('graficoEvolucao').getContext('2d');
+    
+    let cWinsCount = 0;
+    const winRateData = resultados.map((resultado, index) => {
+        if (resultado === 'C') cWinsCount++;
+        return (cWinsCount / (index + 1)) * 100;
+    });
+
+    const labels = resultados.map((_, index) => `Jogo ${index + 1}`);
+
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: 'Taxa de Vitória dos Curiácios (%)',
+            data: winRateData,
+            fill: true,
+            backgroundColor: 'rgba(255, 50, 50, 0.2)',
+            borderColor: 'rgba(255, 50, 50, 1)',
+            tension: 0.1
+        }]
+    };
+
+    if (graficoEvolucao) {
+        graficoEvolucao.data = data;
+        graficoEvolucao.update();
+    } else {
+        graficoEvolucao = new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: 'Evolução da Performance dos Curiácios' },
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        max: 100,
+                        ticks: { callback: value => value + '%' }
+                    }
+                }
+            }
+        });
+    }
+}
+</script>
+</body>
+</html>
